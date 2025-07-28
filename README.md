@@ -1,4 +1,4 @@
-# school-project1
+# school-project
 
 ## Backend
 uvicorn app.main:app --reload
