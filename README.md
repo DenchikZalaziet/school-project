@@ -1,7 +1,7 @@
 # school-project
 
 ## Backend
-uvicorn app.main:app --reload
+uvicorn backend.app.main:app --reload из корня
 
 ## Frontend
-npm run dev
+npm run dev из ./frontend
