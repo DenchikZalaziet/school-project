@@ -1,9 +1,9 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-import uvicorn
 from backend.app.core.auth import user_router
 
 app = FastAPI()
+# noinspection PyTypeChecker
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],  # Важно
@@ -13,8 +13,7 @@ app.add_middleware(
 
 app.include_router(user_router)
 
+
 @app.get("/")
-def index():
+def index() -> dict:
     return {"message": "Test"}
-
-
