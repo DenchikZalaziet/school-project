@@ -1,19 +1,28 @@
-from typing import Optional, Any
-from pydantic import BaseModel, model_validator
+from typing import Optional
+
+from bson import ObjectId
+from pydantic import BaseModel, field_validator, Field
 
 
 class User(BaseModel):
+    class Config:
+        arbitrary_types_allowed = True
+
+    id: Optional[str] = Field(alias='_id', default=None)
     username: str
     disabled: Optional[bool] = None
 
-    @model_validator(mode='before')
-    @classmethod
-    def check_username_length(cls, data: Any) -> Any:
-        if isinstance(data, dict):
-            if "username" in data:
-                if len(data["username"]) > 20:
-                    raise ValueError("Имя пользователя не должно быть длиннее 20 символов")
-        return data
+    @field_validator('username')
+    def check_username_length(cls, value: str) -> str:
+        if len(value) > 20:
+            raise ValueError("Имя пользователя не должно быть длиннее 20 символов")
+        return value
+
+    @field_validator('id', mode='before')
+    def validate_id(cls, value):
+        if isinstance(value, ObjectId):
+            return str(value)
+        return value
 
 
 class UserInDB(User):

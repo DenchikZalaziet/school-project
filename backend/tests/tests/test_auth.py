@@ -1,24 +1,8 @@
 from datetime import timedelta
 
-import pytest
-from backend.app.main import app
+# noinspection PyUnresolvedReferences
+from backend.tests.setup import test_mongo_client, test_db, override_deps, client
 from backend.app.core.auth import get_user_in_db, create_access_token, verify_password, get_password_hash
-
-
-@pytest.fixture(scope="function")
-def mock_db(monkeypatch):
-    from pymongo import MongoClient
-    mock_client = MongoClient()
-    mock_db = mock_client.test_db.users
-    monkeypatch.setattr("backend.app.core.auth.db", mock_db)
-    return mock_db
-
-
-@pytest.fixture
-def client(mock_db):
-    from fastapi.testclient import TestClient
-    mock_db.delete_many({})
-    return TestClient(app)
 
 
 def test_hashing():
@@ -32,7 +16,28 @@ def test_hashing():
     assert verify_password(password, "not_hash") is False
 
 
-def test_full_auth_flow(client, mock_db, monkeypatch):
+def test_user_operations(test_db):
+    users_cl = test_db.users
+    users_cl.insert_one({
+        "username": "test_user",
+        "hashed_password": "hashed_pw",
+        "disabled": False
+    })
+
+    # Поиск пользователя
+    user = get_user_in_db("test_user", users_cl)
+    assert user.username == "test_user"
+    assert user.hashed_password == "hashed_pw"
+    assert not user.disabled
+
+    # Создание токена
+    token = create_access_token({"sub": "test_user"})
+    assert isinstance(token, str)
+    assert len(token) > 100
+
+
+def test_full_auth_flow(client):
+
     # Защищенный route
     response = client.get("/user/me", headers={"Authorization": f"Bearer {0}"})
     assert response.status_code == 401
@@ -42,7 +47,7 @@ def test_full_auth_flow(client, mock_db, monkeypatch):
         "username": "01234567890123456789ABC",
         "password": "01234567890123456789ABC"
     })
-    assert response.status_code == 400
+    assert response.status_code == 422
 
     # Регистрация
     response = client.post("/user/register", data={
@@ -58,7 +63,7 @@ def test_full_auth_flow(client, mock_db, monkeypatch):
         "username": "test_user",
         "password": "secure_password123"
     })
-    assert response.status_code == 400
+    assert response.status_code == 409
 
     # Логин
     response = client.post("/user/login", data={
@@ -79,6 +84,7 @@ def test_full_auth_flow(client, mock_db, monkeypatch):
     response = client.get("/user/me", headers={"Authorization": f"Bearer {token}"})
     assert response.status_code == 200
     assert response.json()["username"] == "test_user"
+    assert response.json()["_id"]
     assert "password" not in response.json()
     assert "hashed_password" not in response.json()
 
@@ -87,22 +93,3 @@ def test_full_auth_flow(client, mock_db, monkeypatch):
     token = create_access_token({"sub": "test_user"}, access_token_expires)
     response = client.get("/user/me", headers={"Authorization": f"Bearer {token}"})
     assert response.status_code == 401
-
-
-def test_user_operations(mock_db):
-    mock_db.insert_one({
-        "username": "test_user",
-        "hashed_password": "hashed_pw",
-        "disabled": False
-    })
-
-    # Поиск пользователя
-    user = get_user_in_db("test_user")
-    assert user.username == "test_user"
-    assert user.hashed_password != "hashed_pw"
-    assert not user.disabled
-
-    # Создание токена
-    token = create_access_token({"sub": "test_user"})
-    assert isinstance(token, str)
-    assert len(token) > 100

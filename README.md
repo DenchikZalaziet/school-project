@@ -1,7 +1,18 @@
 # school-project
 
+---
+
 ## Backend
-uvicorn backend.app.main:app --reload из корня
+### Из корня
+- Запуск сервера с автоматическим обновлением при изменениях: <br>
+``` uvicorn backend.app.main:app --reload ``` <br>
+<br>
+- Запуск всех тестов: <br>
+``` pytest backend/tests ``` <br>
+
+---
 
 ## Frontend
-npm run dev из .\frontend\
+### Из корня
+- Запуск фронтэнда <br>
+``` npm run dev --prefix frontend ``` <br>

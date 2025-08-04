@@ -6,26 +6,27 @@ from jose import jwt, JWTError
 from passlib.context import CryptContext
 from passlib.exc import UnknownHashError
 from pydantic import ValidationError
-from pymongo import MongoClient
 import os
-import dotenv
+from pymongo import MongoClient
 
 from backend.app.schemas.auth_schemas import User, UserInDB, Token, TokenData
+from backend.app.db_dependancies import get_users_collection
 
-dotenv.load_dotenv()
-MONGO_URI = os.getenv("MONGO_URI", "mongodb://localhost:27017/")
 SECRET_KEY = os.getenv("SECRET_KEY", "test_key")
 ALGORITHM = os.getenv("ALGORITHM", "HS256")
 ACCESS_TOKEN_EXPIRE_MINUTES = float(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "10"))
 
-client = MongoClient("mongodb://localhost:27017/")
-db = client.data.users
 user_router = APIRouter(prefix="/user")
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto", bcrypt__rounds=12)
+OAUTH2_SCHEME = OAuth2PasswordBearer(tokenUrl="login")
+PWD_CONTEXT = CryptContext(schemes=["bcrypt"], deprecated="auto", bcrypt__rounds=12)
 
 
-def verify_password(plain_password, hashed_password) -> bool:
+def get_pwd_context() -> CryptContext:
+    pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto", bcrypt__rounds=12)
+    return pwd_context
+
+
+def verify_password(plain_password: str, hashed_password: str, pwd_context: CryptContext = PWD_CONTEXT) -> bool:
     try:
         res = pwd_context.verify(plain_password, hashed_password)
         return res
@@ -33,25 +34,25 @@ def verify_password(plain_password, hashed_password) -> bool:
         return False
 
 
-def get_password_hash(password) -> str:
+def get_password_hash(password: str, pwd_context: CryptContext = PWD_CONTEXT) -> str:
     return pwd_context.hash(password)
 
 
-def get_user_in_db(username: str) -> Optional[UserInDB]:
-    db_user = db.find_one({"username": username})
+def get_user_in_db(username: str, collection: MongoClient) -> Optional[UserInDB]:
+    db_user = collection.find_one({"username": username})
     if not db_user:
         return None
     return UserInDB(**db_user)
 
 
-def authenticate_user(username: str, password: str) -> Optional[User]:
-    user = get_user_in_db(username)
+def authenticate_user(username: str, password: str, collection: MongoClient = Depends(get_users_collection)) -> Optional[User]:
+    user = get_user_in_db(username, collection)
     if not user or not verify_password(password, user.hashed_password):
         return None
     return user
 
 
-async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]) -> User:
+async def get_current_user(token: Annotated[str, Depends(OAUTH2_SCHEME)], collection: MongoClient = Depends(get_users_collection)) -> User:
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Не удалось подтвердить данные для входа",
@@ -65,7 +66,7 @@ async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]) -> Use
         token_data = TokenData(username=username)
     except JWTError:
         raise credentials_exception
-    user = get_user_in_db(username=token_data.username)
+    user = get_user_in_db(username=token_data.username, collection=collection)
     if user is None:
         raise credentials_exception
     return user
@@ -89,8 +90,8 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -
 
 
 @user_router.post("/login")
-async def login_for_access_token(form_data: Annotated[OAuth2PasswordRequestForm, Depends()]) -> Token:
-    user = authenticate_user(form_data.username, form_data.password)
+async def login_for_access_token(form_data: Annotated[OAuth2PasswordRequestForm, Depends()], collection: MongoClient = Depends(get_users_collection)) -> Token:
+    user = authenticate_user(form_data.username, form_data.password, collection)
     if not user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -110,15 +111,15 @@ async def read_users_me(current_user: Annotated[User, Depends(get_current_active
 
 
 @user_router.post("/register")
-async def register(form_data: Annotated[OAuth2PasswordRequestForm, Depends()]) -> Token:
-    if db.find_one({"username": form_data.username}):
-        raise HTTPException(status_code=400, detail="Пользователь с таким именем уже существует")
+async def register(form_data: Annotated[OAuth2PasswordRequestForm, Depends()], collection=Depends(get_users_collection)) -> Token:
+    if collection.find_one({"username": form_data.username}):
+        raise HTTPException(status_code=409, detail="Пользователь с таким именем уже существует")
     hashed_password = get_password_hash(form_data.password)
     try:
         user = UserInDB(username=form_data.username, disabled=False, hashed_password=hashed_password)
     except ValidationError:
-        raise HTTPException(status_code=400, detail="Ошибка валидации")
-    db.insert_one(user.dict())
+        raise HTTPException(status_code=422)
+    collection.insert_one(user.model_dump())
     access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = create_access_token(
         data={"sub": user.username}, expires_delta=access_token_expires
