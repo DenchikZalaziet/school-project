@@ -1,4 +1,3 @@
-import os
 from typing import Annotated, Optional
 from bson import ObjectId
 from bson.errors import InvalidId
@@ -6,12 +5,13 @@ from fastapi import Depends, HTTPException, Form, APIRouter, Response
 from pymongo import MongoClient
 from starlette import status
 
-from backend.app.utils.auth import get_current_active_user, create_access_token
-from backend.app.utils.db import get_users_collection
+from backend.app.schemas.scales_schemas import Scale
+from backend.app.utils.auth_utils import get_current_active_user, create_access_token
+from backend.app.utils.db_utils import get_users_collection, get_scales_collection
 from backend.app.schemas.user_schemas import User, UserEditForm, Token
+from backend.app.utils.loader import ACCESS_TOKEN_EXPIRE_MINUTES
 
 user_router = APIRouter(prefix="/user")
-ACCESS_TOKEN_EXPIRE_MINUTES = float(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "10"))
 
 
 @user_router.get("/me")
@@ -49,6 +49,18 @@ async def delete_user_me(current_user: Annotated[User, Depends(get_current_activ
     result = collection.delete_one({"_id": ObjectId(current_user.id)})
     if not result.acknowledged:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Не удалось удалить пользователя")
+
+
+@user_router.get("/me/scale")
+async def get_my_scales(current_user: Annotated[User, Depends(get_current_active_user)],
+                        length: Optional[int] = None,
+                        collection=Depends(get_scales_collection)) -> list[Scale]:
+    if length is not None and length < 1:
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Длина должна быть больше нуля или None")
+    user_id = current_user.id
+    public_scales_cursor = collection.find({"owner_id": user_id})
+    scales_list = public_scales_cursor.to_list(length=length)
+    return [Scale(**doc) for doc in scales_list]
 
 
 @user_router.get("/{user_id}")

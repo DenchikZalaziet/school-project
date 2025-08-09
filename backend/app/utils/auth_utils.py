@@ -1,4 +1,3 @@
-import os
 from datetime import timedelta, timezone, datetime
 from typing import Optional, Annotated
 from fastapi import Depends, HTTPException
@@ -8,12 +7,11 @@ from pymongo import MongoClient
 from starlette import status
 
 from backend.app.schemas.user_schemas import UserInDB, User, TokenData
-from backend.app.utils.db import get_users_collection
-from backend.app.utils.hashing import verify_password
+from backend.app.utils.db_utils import get_users_collection
+from backend.app.utils.hashing_utils import verify_password
+from backend.app.utils.loader import DEFAULT_ACCESS_TOKEN_EXPIRE_MINUTES, ALGORITHM, SECRET_KEY
 
-OAUTH2_SCHEME = OAuth2PasswordBearer(tokenUrl="login")
-SECRET_KEY = os.getenv("SECRET_KEY", "test_key")
-ALGORITHM = os.getenv("ALGORITHM", "HS256")
+OAUTH2_SCHEME = OAuth2PasswordBearer(tokenUrl="auth")
 
 
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -> str:
@@ -21,7 +19,7 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -
     if expires_delta:
         expire = datetime.now(timezone.utc) + expires_delta
     else:
-        expire = datetime.now(timezone.utc) + timedelta(minutes=15)
+        expire = datetime.now(timezone.utc) + timedelta(minutes=DEFAULT_ACCESS_TOKEN_EXPIRE_MINUTES)
     to_encode.update({"exp": expire})
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt

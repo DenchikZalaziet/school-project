@@ -1,7 +1,7 @@
 from typing import Optional
 from pydantic import BaseModel, field_validator, Field
 
-from backend.app.utils.schemas import check_length, validate_id
+from backend.app.utils.schemas_utils import check_length, validate_id
 
 
 class User(BaseModel):
