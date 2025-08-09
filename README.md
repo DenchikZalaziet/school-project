@@ -1,16 +1,14 @@
 # school-project
 
----
-
 ## Backend
 ### Из корня
 - Запуск сервера с автоматическим обновлением при изменениях: <br>
 ``` uvicorn backend.app.main:app --reload ``` <br>
 <br>
+
 - Запуск всех тестов: <br>
 ``` pytest -s backend/tests ``` <br>
 
----
 
 ## Frontend
 ### Из корня
