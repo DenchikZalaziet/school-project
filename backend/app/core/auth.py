@@ -1,4 +1,3 @@
-import os
 from datetime import timedelta
 from typing import Annotated
 from fastapi import Depends, HTTPException, status, APIRouter
@@ -7,12 +6,12 @@ from pydantic import ValidationError
 from pymongo import MongoClient
 
 from backend.app.schemas.user_schemas import UserInDB, Token
-from backend.app.utils.auth import authenticate_user, create_access_token
-from backend.app.utils.db import get_users_collection
-from backend.app.utils.hashing import get_password_hash
+from backend.app.utils.auth_utils import authenticate_user, create_access_token
+from backend.app.utils.db_utils import get_users_collection
+from backend.app.utils.hashing_utils import get_password_hash
+from backend.app.utils.loader import ACCESS_TOKEN_EXPIRE_MINUTES
 
 auth_router = APIRouter(prefix="/auth")
-ACCESS_TOKEN_EXPIRE_MINUTES = float(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "10"))
 
 
 @auth_router.post("/login")

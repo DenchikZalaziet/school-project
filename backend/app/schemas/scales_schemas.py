@@ -1,8 +1,7 @@
 from typing import Optional
-from bson import ObjectId
 from pydantic import BaseModel, field_validator, Field
 
-from backend.app.utils.schemas import check_length, validate_id
+from backend.app.utils.schemas_utils import check_length, validate_id
 
 
 class Scale(BaseModel):
@@ -10,12 +9,12 @@ class Scale(BaseModel):
         arbitrary_types_allowed = True
 
     id: Optional[str] = Field(alias='_id', default=None)
-    name: str
+    name: Optional[str] = None
     description: Optional[str] = None
     category: Optional[str] = None
     intervals: list[int]
     public: bool = False
-    owner_id: str = None
+    owner_id: Optional[str] = None
 
     _check_name_length: classmethod = field_validator("name")(lambda val: check_length(val, 20))
     _check_description_length: classmethod = field_validator("description")(lambda val: check_length(val, 100))

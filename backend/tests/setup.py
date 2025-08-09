@@ -3,7 +3,7 @@ from pymongo import MongoClient
 from starlette.testclient import TestClient
 
 from backend.app.main import app
-from backend.app.utils.db import get_data_db
+from backend.app.utils.db_utils import get_data_db
 
 
 @pytest.fixture(scope="session")

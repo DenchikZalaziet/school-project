@@ -1,7 +1,7 @@
 from datetime import timedelta
 
-from backend.app.utils.auth import get_user_in_db, create_access_token
-from backend.app.utils.hashing import get_password_hash, verify_password
+from backend.app.utils.auth_utils import get_user_in_db, create_access_token
+from backend.app.utils.hashing_utils import get_password_hash, verify_password
 # noinspection PyUnresolvedReferences
 from backend.tests.setup import test_mongo_client, test_db, override_deps, client
 

@@ -1,7 +1,9 @@
 from passlib.context import CryptContext
 from passlib.exc import UnknownHashError
 
-PWD_CONTEXT = CryptContext(schemes=["bcrypt"], deprecated="auto", bcrypt__rounds=12)
+from backend.app.utils.loader import BCRYPT_ROUNDS
+
+PWD_CONTEXT = CryptContext(schemes=["bcrypt"], deprecated="auto", bcrypt__rounds=BCRYPT_ROUNDS)
 
 
 def verify_password(plain_password: str, hashed_password: str, pwd_context: CryptContext = PWD_CONTEXT) -> bool:
