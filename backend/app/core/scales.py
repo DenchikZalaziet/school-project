@@ -19,7 +19,7 @@ async def create_scale(scale: Scale,
                        current_user: Annotated[User, Depends(get_current_active_user)],
                        collection: MongoClient = Depends(get_scales_collection)) -> Scale:
     scale.owner_id = str(current_user.id)
-    scale_data = scale.model_dump(by_alias=True, exclude={"id"})
+    scale_data = scale.model_dump(exclude={"id"})
     result = collection.insert_one(scale_data)
     created_scale = collection.find_one({"_id": result.inserted_id})
     scale = Scale(**created_scale)

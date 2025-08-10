@@ -41,7 +41,7 @@ async def register(form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
         user = UserInDB(username=form_data.username, disabled=False, hashed_password=hashed_password)
     except ValidationError:
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY)
-    collection.insert_one(user.model_dump())
+    collection.insert_one(user.model_dump(exclude={"id"}))
     access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = create_access_token(
         data={"sub": user.username}, expires_delta=access_token_expires

@@ -1,10 +1,6 @@
 from backend.app.schemas.instruments_schemas import Instrument
 from backend.app.schemas.scales_schemas import Scale
-
-NOTES_LIST = {
-    "sharps": ["C", "C♯", "D", "D♯", "E", "F", "F♯", "G", "G♯", "A", "A♯", "B"],
-    "flats": ["C", "D♭", "D", "E♭", "E", "F", "G♭", "G", "A♭", "A", "B♭", "B"]
-}
+from backend.app.utils.loader import NOTES_LIST
 
 
 def get_note_index(note: str) -> int:

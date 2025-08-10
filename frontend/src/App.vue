@@ -24,7 +24,7 @@ export default {
       formData.append('username', "example");
       formData.append('password', "example");
 
-      const response = await axios.post(`http://127.0.0.1:8000/user/register`, formData,
+      const response = await axios.post(`http://127.0.0.1:8000/auth/register`, formData,
       { headers: {'Content-Type': 'application/x-www-form-urlencoded'}});
       this.messageLogin = response;
       console.log(response);
@@ -34,7 +34,7 @@ export default {
       formData.append('username', "example");
       formData.append('password', "example");
 
-      const response = await axios.post(`http://127.0.0.1:8000/user/login`, formData,
+      const response = await axios.post(`http://127.0.0.1:8000/auth/login`, formData,
       { headers: {'Content-Type': 'application/x-www-form-urlencoded'}});
       this.messageLogin = response;
       console.log(response);
