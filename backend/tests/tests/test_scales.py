@@ -92,7 +92,7 @@ def test_full_scale_flow(client):
     response = client.get("/scale")
     assert response.status_code == 200
     assert len(response.json()) == 2
-    assert response.json()[0]["_id"]
+    assert len(response.json()[0]["_id"]) > 5
 
     response = client.get("/scale", params={"length": 0})
     assert response.status_code == 422

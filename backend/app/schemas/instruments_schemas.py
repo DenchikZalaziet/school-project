@@ -1,5 +1,7 @@
 from typing import Optional
 from pydantic import BaseModel, field_validator
+
+from backend.app.utils.loader import NOTES_LIST
 from backend.app.utils.schemas_utils import check_length
 
 
@@ -14,7 +16,6 @@ class Instrument(BaseModel):
 
     @field_validator("tuning")
     def check_notes(cls, values: list[str]):
-        from backend.app.utils.notes_utils import NOTES_LIST
         for note in values:
             if note not in NOTES_LIST["sharps"] and note not in NOTES_LIST["flats"]:
                 raise ValueError(f"Не найдена нота {note}")
