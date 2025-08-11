@@ -75,7 +75,7 @@ def test_full_auth_flow(client):
     response = client.get("/user/me", headers={"Authorization": f"Bearer {token}"})
     assert response.status_code == 200
     assert response.json()["username"] == "test_user"
-    assert response.json()["_id"]
+    assert len(response.json()["_id"]) > 5
     assert "password" not in response.json()
     assert "hashed_password" not in response.json()
 
