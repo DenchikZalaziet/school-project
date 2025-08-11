@@ -11,7 +11,9 @@ app = FastAPI()
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],  # Важно
-    allow_methods=["*"]
+    allow_methods=["*"],
+    allow_headers=["*"],
+    allow_credentials=True,
 )
 
 app.include_router(auth_router)
