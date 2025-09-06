@@ -29,7 +29,7 @@ class Token(BaseModel):
 
 
 class TokenData(BaseModel):
-    username: Optional[str] = None
+    id: Optional[str] = None
 
 
 class UserEditForm(BaseModel):

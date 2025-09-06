@@ -1,0 +1,73 @@
+import { createRouter, createWebHistory, RouteRecordRaw } from 'vue-router';
+
+import { useAuthStore } from './auth_store';
+import HomeView from '@/views/HomeView.vue'
+import LoginView from '@/views/LoginView.vue'
+import RegisterView from '@/views/RegisterView.vue';
+import ScalesView from '@/views/ScalesView.vue';
+import UserMeView from '@/views/UserMeView.vue';
+import ScaleIdView from '@/views/ScaleIdView.vue';
+
+
+
+const routes: Array<RouteRecordRaw> = [
+  {
+    path: '/',
+    name: 'Home',
+    component: HomeView
+  },
+  {
+    path: '/login',
+    name: 'Login',
+    component: LoginView
+  },
+  {
+    path: '/register',
+    name: 'Register',
+    component: RegisterView
+  },
+  {
+    path: '/profile/me',
+    name: 'My Profile',
+    component: UserMeView,
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/scales',
+    name: 'Public Scales',
+    component: ScalesView
+  },
+  {
+    path: '/scales/:scale_id',
+    name: 'Scale',
+    component: ScaleIdView,
+    meta: { requiresAuth: true }
+  },
+
+  // 404
+  {
+    path: '/:pathMatch(.*)*',
+    redirect: '/'
+  }
+];
+
+const router = createRouter({
+  history: createWebHistory(),
+  routes
+});
+
+router.beforeEach((to, from, next) => {
+  if (to.meta.requiresAuth) {
+    const isLoggedIn = useAuthStore().isAuthenticated
+    
+    if (isLoggedIn) {
+      next();
+    } else {
+      next({ name: 'Login' });
+    }
+  } else {
+    next();
+  }
+});
+
+export default router;

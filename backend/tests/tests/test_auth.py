@@ -1,6 +1,6 @@
 from datetime import timedelta
 
-from backend.app.utils.auth_utils import get_user_in_db, create_access_token
+from backend.app.utils.auth_utils import get_user_in_db_by_name, create_access_token
 from backend.app.utils.hashing_utils import get_password_hash, verify_password
 # noinspection PyUnresolvedReferences
 from backend.tests.setup import test_mongo_client, test_db, override_deps, client
@@ -25,12 +25,13 @@ def test_db_user_operations(test_db):
         "disabled": False
     })
 
-    user = get_user_in_db("test_user", users_cl)
+    user = get_user_in_db_by_name("test_user", users_cl)
     assert user.username == "test_user"
     assert user.hashed_password == "hashed_pw"
+    id = user.id
     assert not user.disabled
 
-    token = create_access_token({"sub": "test_user"})
+    token = create_access_token({"sub": id})
     assert isinstance(token, str)
     assert len(token) > 100
 

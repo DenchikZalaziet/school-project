@@ -56,7 +56,7 @@ def test_full_scale_flow(client):
     assert response.status_code == 401
 
     response = client.post("/scale", headers={"Authorization": f"Bearer {token}"}, json={
-        "name": "test_scale_private",
+        "name": "A_test_scale_private",
         "intervals": [3, 2, 2, 3],
         "description": "test_description",
         "category": "test"
@@ -66,7 +66,7 @@ def test_full_scale_flow(client):
 
     response = client.get("/scale")
     assert response.status_code == 200
-    assert len(response.json()) == 0
+    assert len(response.json()["scales"]) == 0
 
     response = client.post("/scale", headers={"Authorization": f"Bearer {token}"}, json={
         "name": "test_scale1",
@@ -91,24 +91,24 @@ def test_full_scale_flow(client):
 
     response = client.get("/scale")
     assert response.status_code == 200
-    assert len(response.json()) == 2
-    assert len(response.json()[0]["_id"]) > 5
+    assert len(response.json()["scales"]) == 2
+    assert len(response.json()["scales"][0]["_id"]) > 5
 
-    response = client.get("/scale", params={"length": 0})
+    response = client.get("/scale", params={"length": -1})
     assert response.status_code == 422
 
     response = client.get("/scale", params={"length": 1})
     assert response.status_code == 200
-    assert len(response.json()) == 1
+    assert len(response.json()["scales"]) == 1
 
     response = client.get("/user/me/scale")
     assert response.status_code == 401
 
     response = client.get("/user/me/scale", headers={"Authorization": f"Bearer {token}"})
     assert response.status_code == 200
-    assert len(response.json()) == 3
+    assert len(response.json()["scales"]) == 3
 
-    scale_id = response.json()[0]["_id"]
+    scale_id = response.json()["scales"][0]["_id"]
     fake_scale_id = ObjectId('a' * 24)
 
     response = client.get(f"/scale/{scale_id}", headers={"Authorization": f"Bearer {token}"})
