@@ -35,7 +35,15 @@ class ScaleEditForm(BaseModel):
     name: str
     description: Optional[str] = None
     category: Optional[str] = None
+    intervals: list[int] = None
 
     _check_name_length: classmethod = field_validator("name")(lambda val: check_length(val, 20))
     _check_description_length: classmethod = field_validator("description")(lambda val: check_length(val, 100))
     _check_category_length: classmethod = field_validator("category")(lambda val: check_length(val, 20))
+
+    @field_validator('intervals')
+    def check_interval_sign(cls, values: list[int]):
+        for interval in values:
+            if interval < 0:
+                raise ValueError("Интервал не может быть отрицательным")
+        return values

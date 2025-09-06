@@ -20,8 +20,7 @@ def test_user_flow(client):
         "unrelated_field": "unrelated",
         "description": "test_description"
     })
-    assert response.status_code == 200
-    token = response.json()["access_token"]
+    assert response.status_code == 204
 
     response = client.get("/user/me", headers={"Authorization": f"Bearer {token}"})
     assert response.status_code == 200
