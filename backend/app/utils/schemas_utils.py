@@ -4,7 +4,7 @@ from bson import ObjectId
 
 def check_length(value: Optional[str], length: int) -> str:
     if value and len(value) > 20:
-        raise ValueError(f"Имя не должно быть длиннее {length} символов")
+        raise ValueError(f"Поле не должно быть длиннее {length} символов")
     return value
 
 

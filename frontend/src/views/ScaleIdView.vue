@@ -18,6 +18,7 @@
                             id="scaleName" 
                             @change="scale_info_changed = true"
                             v-model="current_name"
+                            placeholder="Имя"
                             :disabled="!is_my_scale">
                     </div>
 
@@ -35,6 +36,7 @@
                             rows="3"
                             @change="scale_info_changed = true"
                             v-model="current_description"
+                            placeholder="Описание"
                             :disabled="!is_my_scale">
                         </textarea>
                     </div>
@@ -142,8 +144,8 @@ export default {
                 this.is_my_scale = true
             }
             this.current_name = scale["name"]
-            this.current_description = scale["description"] ? scale["description"] : "Нет описания"
-            this.current_category = scale["category"] ? scale["category"] : "Нет категории"
+            this.current_description = scale["description"]
+            this.current_category = scale["category"]
             this.current_intervals = scale["intervals"]
         })
         .catch(error => {
