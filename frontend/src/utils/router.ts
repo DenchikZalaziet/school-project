@@ -7,6 +7,7 @@ import RegisterView from '@/views/RegisterView.vue';
 import ScalesView from '@/views/ScalesView.vue';
 import UserMeView from '@/views/UserMeView.vue';
 import ScaleIdView from '@/views/ScaleIdView.vue';
+import CreateScaleView from '@/views/CreateScaleView.vue';
 
 
 
@@ -41,6 +42,12 @@ const routes: Array<RouteRecordRaw> = [
     path: '/scales/:scale_id',
     name: 'Scale',
     component: ScaleIdView,
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/scales/create',
+    name: 'Create Scale',
+    component: CreateScaleView,
     meta: { requiresAuth: true }
   },
 

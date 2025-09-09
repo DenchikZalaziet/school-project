@@ -78,7 +78,8 @@
                             </button>
 
                             <div v-if="is_my_scale" class="d-flex gap-2 justify-content-end mt-4">
-                                <button type="submit" class="btn btn-success" :disabled="!isFormValid">Сохранить</button>
+                                <button type="submit" class="btn btn-success form-btn mx-4 px-4" :disabled="!isFormValid">Сохранить</button>
+                                <button type="button" class="btn btn-danger form-btn" @click="deleteScale">Удалить</button>
                             </div>
                             </form>
                         </div>
@@ -179,7 +180,17 @@ export default {
         console.log(error)
       })
     },
-    async deleteScale(){
+    async deleteScale() {
+      await api.delete(`/scale/${this.scale_id}`)
+      .then (response => {
+        this.error_message = ''
+        this.scale_info_changed = false
+
+      })
+      .catch (error => {
+        this.error_message = error.response?.data?.detail | "Произошла ошибка"
+        console.log(error)
+      })
 
     }
   },
@@ -195,6 +206,12 @@ export default {
 </script>
 
 <style scoped>
+.form-btn {
+    margin: 0;
+    
+
+}
+
 .scale-name {
     color: var(--dark-blue);
     margin: 0;

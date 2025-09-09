@@ -82,10 +82,9 @@ async def delete_scale_by_id(scale_id: str,
         return
 
     found_scale = Scale(**scale)
-    if not found_scale.public:
-        user_id = current_user.id
-        if found_scale.owner_id != user_id:
-            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Гамма не может быть изменена текущим пользователем")
+    user_id = current_user.id
+    if found_scale.owner_id != user_id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Гамма не может быть изменена текущим пользователем")
 
     result = collection.delete_one({"_id": ObjectId(scale_id)})
     if not result.acknowledged:
