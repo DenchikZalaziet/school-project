@@ -62,7 +62,7 @@
                                 
                                 <button v-if="is_my_scale" 
                                         type="button" 
-                                        class="btn btn-outline-danger btn-sm"
+                                        class="btn btn-outline-danger btn-sm remove-button"
                                         @click="removeInterval(index); scale_info_changed = true">
                                 <i class="fas fa-times"></i>
                                 X
@@ -152,23 +152,24 @@ export default {
         .catch(error => {
             console.log(error)
             this.error_message = error.response?.data?.detail | "Произошла ошибка"
-            if (response.status == 402) {
+            if (error.response?.status == 403) {
                 this.no_content = true
-                this.no_content_message = 'Просмотр приватной гаммы запрещен'
+                this.no_content_message = 'Просмотр этой гаммы запрещен для текущего пользователя'
             }
         })
     },
     async submitScale() {
-      const formData = new FormData()
-      formData.append("name", this.current_name)
-      formData.append("description", this.curren_description)
-      formData.append("category", this.current_category)
-      formData.append("intervals", this.current_intervals)
+      const data = {
+        name: this.current_name,
+        description: this.current_description,
+        category: this.current_category,
+        intervals: this.current_intervals
+      }
 
       await api.patch(`/scale/${this.scale_id}`, 
-        formData, {
+        data, {
         headers: { 
-            "Content-Type": "multipart/form-data"
+            "Content-Type": "application/json"
         }
       })
       .then (response => {
@@ -181,11 +182,10 @@ export default {
       })
     },
     async deleteScale() {
-      await api.delete(`/scale/${this.scale_id}`)
+      await api.delete('/scale/${this.scale_id}')
       .then (response => {
         this.error_message = ''
         this.scale_info_changed = false
-
       })
       .catch (error => {
         this.error_message = error.response?.data?.detail | "Произошла ошибка"
@@ -206,10 +206,13 @@ export default {
 </script>
 
 <style scoped>
-.form-btn {
-    margin: 0;
-    
+.remove-button {
+    background-color: white;
+}
 
+.remove-button:hover {
+    color: rgb(200, 0, 0);
+    border-color: rgb(200, 0, 0);
 }
 
 .scale-name {

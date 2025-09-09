@@ -59,7 +59,6 @@
 <script setup>
 import Header from '@/components/Header.vue'
 import MyScales from '@/components/MyScales.vue';
-import Scales from '@/components/Scales.vue';
 import { useAuthStore } from '@/utils/auth_store';
 
 const authStore = useAuthStore()

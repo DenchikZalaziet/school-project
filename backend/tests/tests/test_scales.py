@@ -115,10 +115,11 @@ def test_full_scale_flow(client):
     assert response.status_code == 200
     assert response.json()["name"]
 
-    response = client.patch(f"/scale/{scale_id}", headers={"Authorization": f"Bearer {token}"}, data={
+    response = client.patch(f"/scale/{scale_id}", headers={"Authorization": f"Bearer {token}"}, json={
         "name": "edited_name",
         "description": "edited_description"
     })
+    print(response.text)
     assert response.status_code == 204
 
     response = client.get(f"/scale/{scale_id}", headers={"Authorization": f"Bearer {token}"})
@@ -180,13 +181,37 @@ def test_scale_private(client):
     assert response.status_code == 201
     scale_id = response.json()["_id"]
 
+    response = client.post("/scale", headers={"Authorization": f"Bearer {token1}"}, json={
+        "name": "test_scale_public",
+        "description": "test_description",
+        "category": "test",
+        "intervals": [0, 1, 2, 3, 4, 5, 6, 7],
+        "public": True
+    })
+    assert response.status_code == 201
+    scale_id_public = response.json()["_id"]
+
     response = client.get(f"/scale/{scale_id}", headers={"Authorization": f"Bearer {token2}"})
     assert response.status_code == 403
 
-    response = client.patch(f"/scale/{scale_id}", headers={"Authorization": f"Bearer {token2}"}, data={
+    response = client.get(f"/scale/{scale_id_public}", headers={"Authorization": f"Bearer {token2}"})
+    assert response.status_code == 200
+
+    response = client.patch(f"/scale/{scale_id}", headers={"Authorization": f"Bearer {token2}"}, json={
+        "name": "edited_name"
+    })
+    assert response.status_code == 403
+
+    response = client.patch(f"/scale/{scale_id_public}", headers={"Authorization": f"Bearer {token2}"}, json={
         "name": "edited_name"
     })
     assert response.status_code == 403
 
     response = client.delete(f"/scale/{scale_id}", headers={"Authorization": f"Bearer {token2}"})
     assert response.status_code == 403
+
+    response = client.delete(f"/scale/{scale_id_public}", headers={"Authorization": f"Bearer {token2}"})
+    assert response.status_code == 403
+
+    response = client.delete(f"/scale/{scale_id}", headers={"Authorization": f"Bearer {token1}"})
+    assert response.status_code == 204

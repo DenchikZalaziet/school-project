@@ -2,7 +2,7 @@
 <div class="scales-page">
 
     <div class="header-controls mb-4">
-      <h1 class="page-title">Гаммы</h1>
+      <h1 class="page-title">Мои гаммы</h1>
       <div class="controls d-flex align-items-center">
         <div class="search-box">
           <input type="text" class="form-control" placeholder="Искать по названию..." v-model="searchQuery">

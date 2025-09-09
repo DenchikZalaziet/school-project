@@ -93,7 +93,7 @@ async def delete_scale_by_id(scale_id: str,
 
 @scales_router.patch("/{scale_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def edit_scale_by_id(scale_id: str,
-                           data: Annotated[ScaleEditForm, Form()],
+                           data: ScaleEditForm,
                            current_user: Annotated[User, Depends(get_current_active_user)],
                            collection: MongoClient = Depends(get_scales_collection)) -> None:
     try:
@@ -111,11 +111,11 @@ async def edit_scale_by_id(scale_id: str,
 
     result = collection.update_one({"_id": current_scale_objectId}, {"$set": data.model_dump(exclude_none=True)})
     if not result.acknowledged:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Не удалось изменить пользователя")
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Не удалось изменить гамму")
 
 
 @scales_router.get("/{scale_id}/notes")
-async def get_scale_by_id(scale_id: str, root: str = "C", prefer_flats: bool = False,
+async def get_scale_notes_by_id(scale_id: str, root: str = "C", prefer_flats: bool = False,
                           collection=Depends(get_scales_collection)) -> list[str]:
     try:
         scale = collection.find_one({"_id": ObjectId(scale_id)})

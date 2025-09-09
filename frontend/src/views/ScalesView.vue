@@ -1,7 +1,6 @@
 <template>
   <Header></Header>
-  
-  <Scales> </Scales>
+  <Scales></Scales>
 </template>
 
 <script setup>
@@ -12,5 +11,5 @@ import Scales from '@/components/Scales.vue'
 <script>
 </script>
 
-<style>
+<style scoped>
 </style>
