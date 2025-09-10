@@ -165,7 +165,6 @@ export default {
         category: this.current_category,
         intervals: this.current_intervals
       }
-
       await api.patch(`/scale/${this.scale_id}`, 
         data, {
         headers: { 
@@ -182,7 +181,7 @@ export default {
       })
     },
     async deleteScale() {
-      await api.delete('/scale/${this.scale_id}')
+      await api.delete(`/scale/${this.scale_id}`)
       .then (response => {
         this.error_message = ''
         this.scale_info_changed = false
@@ -191,7 +190,6 @@ export default {
         this.error_message = error.response?.data?.detail | "Произошла ошибка"
         console.log(error)
       })
-
     }
   },
   computed: {
