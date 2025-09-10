@@ -2,15 +2,16 @@ import math
 from typing import Annotated, Union
 from bson import ObjectId
 from bson.errors import InvalidId
-from fastapi import Depends, HTTPException, APIRouter, Form
+from fastapi import Depends, HTTPException, APIRouter
 from pymongo import MongoClient
 from starlette import status
 
 from backend.app.utils.auth_utils import get_current_active_user
 from backend.app.utils.db_utils import get_scales_collection
+from backend.app.utils.notes_utils import get_scale_notes
+from backend.app.utils.loader import DEFAULT_SCALE_NAME_CHANGE_PREVENT
 from backend.app.schemas.user_schemas import User
 from backend.app.schemas.scales_schemas import Scale, ScaleEditForm
-from backend.app.utils.notes_utils import get_scale_notes
 
 scales_router = APIRouter(prefix="/scale")
 
@@ -19,7 +20,11 @@ scales_router = APIRouter(prefix="/scale")
 async def create_scale(scale: Scale,
                        current_user: Annotated[User, Depends(get_current_active_user)],
                        collection: MongoClient = Depends(get_scales_collection)) -> Scale:
+    if scale.category == DEFAULT_SCALE_NAME_CHANGE_PREVENT:
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Категория не может быть 'Default'")
+    
     scale.owner_id = str(current_user.id)
+    
     scale_data = scale.model_dump(exclude={"id"})
     result = collection.insert_one(scale_data)
     created_scale = collection.find_one({"_id": result.inserted_id})
@@ -103,7 +108,7 @@ async def edit_scale_by_id(scale_id: str,
 
     scale = collection.find_one({"_id": current_scale_objectId})
 
-    if scale["category"] == "Default":
+    if scale["category"] == DEFAULT_SCALE_NAME_CHANGE_PREVENT or data.category == DEFAULT_SCALE_NAME_CHANGE_PREVENT:
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Категория не может быть 'Default'")
 
     if scale and scale["owner_id"] != current_user.id:
