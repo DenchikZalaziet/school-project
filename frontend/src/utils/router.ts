@@ -8,6 +8,7 @@ import ScalesView from '@/views/ScalesView.vue';
 import UserMeView from '@/views/UserMeView.vue';
 import ScaleIdView from '@/views/ScaleIdView.vue';
 import CreateScaleView from '@/views/CreateScaleView.vue';
+import NotFound404View from '@/views/NotFound404View.vue';
 
 
 
@@ -54,7 +55,8 @@ const routes: Array<RouteRecordRaw> = [
   // 404
   {
     path: '/:pathMatch(.*)*',
-    redirect: '/'
+    name: '404',
+    component: NotFound404View
   }
 ];
 
@@ -65,16 +67,16 @@ const router = createRouter({
 
 router.beforeEach((to, from, next) => {
   if (to.meta.requiresAuth) {
-    const isLoggedIn = useAuthStore().isAuthenticated
+    const isLoggedIn = useAuthStore().isAuthenticated;
     
     if (isLoggedIn) {
       next();
     } else {
       next({ name: 'Login' });
-    }
+    };
   } else {
     next();
-  }
+  };
 });
 
 export default router;

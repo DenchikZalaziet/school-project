@@ -13,24 +13,24 @@
 
         <div class="text-end" v-if="authStore.isAuthenticated">
           <router-link :to="`/profile/me`" class="link">
-           <a href="#" class="btn btn-outline-primary rounded-pill px-4 mx-2 shadow-sm">
-            <i class="bi bi-person me-2"></i> {{ authStore.username }}
-           </a>
+            <a href="#" class="btn btn-outline-primary rounded-pill px-4 mx-2 shadow-sm">
+              <i class="bi bi-person me-2"></i> {{ authStore.username }}
+            </a>
           </router-link>
           <button type="button" class="btn btn-primary me-2" @click="logout">Выйти</button>
         </div>
+
         <div class="text-end" v-else>
           <button type="button" class="btn btn-outline-primary me-2 px-4" @click="$router.push('/login')">Вход</button>
           <button type="button" class="btn btn-primary" @click="$router.push('/register')">Регистрация</button>
         </div>
       </div>
     </div>
-  
   </header>
 </template>
 
 <script setup>
-import { useAuthStore } from '@/utils/auth_store'
+import { useAuthStore } from '@/utils/auth_store';
 
 const authStore = useAuthStore();
 </script>
@@ -38,13 +38,9 @@ const authStore = useAuthStore();
 <script>
 export default {
   name: 'Header',
-  data() {
-    return {
-    }
-  },
   methods: {
     async logout() {
-      useAuthStore().logout()
+      useAuthStore().logout();
       this.$router.push('/');
     }
   }
@@ -52,78 +48,78 @@ export default {
 </script>
 
 <style scoped>
-  .link { 
-    text-decoration: none; 
-  }
+.link { 
+  text-decoration: none; 
+}
   
-  .app-header {
-    background-color: white;
-    border-top: 4px solid var(--primary-blue);
-    border-bottom: 1px solid var(--border-blue);
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-  }
+.app-header {
+  background-color: white;
+  border-top: 4px solid var(--primary-blue);
+  border-bottom: 1px solid var(--border-blue);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+}
   
-  .logo {
-    color: var(--primary-blue);
-    font-size: 1.5rem;
-    gap: 10px;
-  }
-  
-  .nav-link {
-    color: #333;
-    font-weight: 500;
-    position: relative;
-    padding: 0.5rem 1rem !important;
-    transition: all 0.3s;
-  }
-  
-  .nav-link:hover, .nav-link.active {
-    color: var(--primary-blue);
-  }
-  
-  .nav-link:after {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: 50%;
-    width: 0;
-    height: 3px;
-    background: var(--primary-blue);
-    transition: all 0.3s;
-    transform: translateX(-50%);
-  }
-  
-  .nav-link:hover:after, .nav-link.active:after {
-    width: 70%;
-  }
-  
-  .btn-outline-primary {
-    color: var(--primary-blue);
-    border-color: var(--primary-blue);
-  }
-  
-  .btn-outline-primary:hover {
-    background-color: var(--primary-blue);
-    color: white;
-  }
-  
-  .btn-primary {
-    background-color: var(--primary-blue);
-    border-color: var(--primary-blue);
-    transition: all 0.3s;
-  }
-  
-  .btn-primary:hover {
-    background-color: var(--dark-blue);
-    border-color: var(--dark-blue);
-    transform: translateY(-2px);
-  }
-  
-  .user-info {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    color: #333;
-    font-weight: 500;
-  }
+.logo {
+  color: var(--primary-blue);
+  font-size: 1.5rem;
+  gap: 10px;
+}
+
+.nav-link {
+  color: #333;
+  font-weight: 500;
+  position: relative;
+  padding: 0.5rem 1rem !important;
+  transition: all 0.3s;
+}
+
+.nav-link:hover, .nav-link.active {
+  color: var(--primary-blue);
+}
+
+.nav-link:after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  width: 0;
+  height: 3px;
+  background: var(--primary-blue);
+  transition: all 0.3s;
+  transform: translateX(-50%);
+}
+
+.nav-link:hover:after, .nav-link.active:after {
+  width: 70%;
+}
+
+.btn-outline-primary {
+  color: var(--primary-blue);
+  border-color: var(--primary-blue);
+}
+
+.btn-outline-primary:hover {
+  background-color: var(--primary-blue);
+  color: white;
+}
+
+.btn-primary {
+  background-color: var(--primary-blue);
+  border-color: var(--primary-blue);
+  transition: all 0.3s;
+}
+
+.btn-primary:hover {
+  background-color: var(--dark-blue);
+  border-color: var(--dark-blue);
+  transform: translateY(-2px);
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #333;
+  font-weight: 500;
+}
 </style>

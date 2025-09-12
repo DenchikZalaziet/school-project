@@ -32,8 +32,7 @@
         <button 
           type="submit" 
           class="btn register-btn w-100"
-          :disabled="!isFormValid"
-        >
+          :disabled="!isFormValid">
           Создать
         </button>
       </form>
@@ -48,28 +47,33 @@
   </div>
 </template>
 
-<script>
+<script setup>
 import { useAuthStore } from '@/utils/auth_store';
+</script>
 
+<script>
 export default {
   name: 'Register View',
   data() {
     return {
       username: '',
       password: '',
-      error_message: ''
+      error_message: '',
+
+      loading: false
     }
   },
   computed: {
     isFormValid() {
-      return this.username.trim() !== '' && this.password.trim() !== ''
+      return this.username.trim() !== '' && this.password.trim() !== '';
     }
   },
   methods: {
     async handleRegister() {
-      const authStore = useAuthStore();
-      await authStore.register(this.username, this.password);
-      this.error_message = authStore.error_message;
+      this.loading = true;
+      await useAuthStore().register(this.username, this.password);
+      this.error_message = useAuthStore().error_message;
+      this.loading = false;
     },
     async redirectToLogin() {
       this.$router.push('/login');

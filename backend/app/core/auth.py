@@ -17,7 +17,6 @@ auth_router = APIRouter(prefix="/auth")
 @auth_router.post("/login")
 async def login_for_access_token(form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
                                  collection: MongoClient = Depends(get_users_collection)) -> Token:
-    
     user = authenticate_user(form_data.username, form_data.password, collection)
     if not user:
         raise HTTPException(
@@ -25,7 +24,7 @@ async def login_for_access_token(form_data: Annotated[OAuth2PasswordRequestForm,
             detail="Неверное имя пользователя или пароль",
             headers={"WWW-Authenticate": "Bearer"},
         )
-    
+
     access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = create_access_token(
         data={"sub": user.id}, expires_delta=access_token_expires

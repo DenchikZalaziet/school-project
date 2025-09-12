@@ -1,6 +1,5 @@
 <template>
-<div class="scales-page">
-
+  <div class="scales-page">
     <div class="header-controls mb-4">
       <h1 class="page-title">Мои гаммы</h1>
       <div class="controls d-flex align-items-center">
@@ -28,7 +27,6 @@
       </div>
       
       <div v-if="paginatedScales.length === 0" class="empty-state text-center py-5">
-        <i class="fas fa-music fa-3x mb-3"></i>
         <h4>Ничего не найдено!</h4>
       </div>
     </div>
@@ -50,29 +48,37 @@
 </template>
 
 <script>
-import Scales from './Scales.vue'
-import api from '@/utils/axios'
+import Scales from './Scales.vue';
+import api from '@/utils/axios';
+import { useAuthStore } from '@/utils/auth_store';
 
-const pageLength = 10
+const pageLength = 10;
 
 export default {
   extends: Scales,
   methods: {
     async loadScalesPage() {
+      this.loading = true;
       await api.get('/user/me/scale', {
         params: {
-            length: pageLength,
-            page: this.currentPage,
-            query: this.searchQuery
+          length: pageLength,
+          page: this.currentPage,
+          query: this.searchQuery
+        },
+        headers: {
+          'Authorization': `Bearer ${useAuthStore().token}`
         }
       })
       .then (response => {
-        this.totalPages = response.data["pages"]
-        this.paginatedScales = response.data["scales"]
+        this.totalPages = response.data["pages"];
+        this.paginatedScales = response.data["scales"];
       })
       .catch (error => {
-        console.log(error)
+        console.log(error);
       })
+      .finally(() => {
+        this.loading = false;
+      });
     }
   }
 }

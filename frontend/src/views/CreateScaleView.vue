@@ -7,12 +7,12 @@
 
 
 <script setup>
-import Header from '@/components/Header.vue'
+import Header from '@/components/Header.vue';
 </script>
 
 <script>
 export default {
-  name: 'Create Scale',
+  name: 'Create Scale View',
   data() {
     return {
     }

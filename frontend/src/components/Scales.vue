@@ -28,7 +28,6 @@
       </div>
       
       <div v-if="paginatedScales.length === 0" class="empty-state text-center py-5">
-        <i class="fas fa-music fa-3x mb-3"></i>
         <h4>Ничего не найдено!</h4>
       </div>
     </div>
@@ -52,7 +51,8 @@
 <script>
 import api from '@/utils/axios';
 
-const pageLength = 10
+const pageLength = 10;
+
 export default {
   name: 'Scales',
   data() {
@@ -61,40 +61,46 @@ export default {
         searchQuery: "",
         currentPage: 1,
         totalPages: 1,
-        paginatedScales: []
+        paginatedScales: [],
+
+        loading: false
     }
   },
   methods: {
     changePage(page) {
-        if (page <= this.totalPages && page > 0) {
-            this.currentPage = page
-            this.loadScalesPage()
-        }
+      if (page <= this.totalPages && page > 0) {
+        this.currentPage = page;
+        this.loadScalesPage();
+      };
     },
     async loadScalesPage() {
+      this.loading = true
       await api.get('/scale', {
         params: {
-            length: pageLength,
-            page: this.currentPage,
-            query: this.searchQuery
+          length: pageLength,
+          page: this.currentPage,
+          query: this.searchQuery
         }
       })
       .then (response => {
-        this.totalPages = response.data["pages"]
-        this.paginatedScales = response.data["scales"]
+        this.totalPages = response.data["pages"];
+        this.paginatedScales = response.data["scales"];
       })
       .catch (error => {
-        console.log(error)
+        console.log(error);
       })
+      .finally(() => {
+        this.loading = false;
+      });
     }
   },
   watch: {
     searchQuery() {
-      this.loadScalesPage()
+      this.loadScalesPage();
     }
   },
   created() {
-    this.loadScalesPage()
+    this.loadScalesPage();
   }
 }
 </script>

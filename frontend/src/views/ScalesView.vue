@@ -4,11 +4,14 @@
 </template>
 
 <script setup>
-import Header from '@/components/Header.vue'
-import Scales from '@/components/Scales.vue'
+import Header from '@/components/Header.vue';
+import Scales from '@/components/Scales.vue';
 </script>
 
 <script>
+export default {
+  name: 'Public Scales View'
+}
 </script>
 
 <style scoped>

@@ -4,27 +4,21 @@
 
 
 <script setup>
-import Header from '@/components/Header.vue'
+import Header from '@/components/Header.vue';
 </script>
 
 <script>
 export default {
-  name: 'Home View',
-  data() {
-    return {
-    }
-  },
-  methods: {
-  }
+  name: 'Home View'
 }
 </script>
 
 <style>
 :root {
-    --primary-blue: #4da6ff;
-    --dark-blue: #2c7db6;
-    --light-blue: #e0f7ff;
-    --border-blue: #c1e3ff;
+  --primary-blue: #4da6ff;
+  --dark-blue: #2c7db6;
+  --light-blue: #e0f7ff;
+  --border-blue: #c1e3ff;
 }
 </style>
 

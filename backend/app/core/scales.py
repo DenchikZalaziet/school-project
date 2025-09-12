@@ -22,9 +22,9 @@ async def create_scale(scale: Scale,
                        collection: MongoClient = Depends(get_scales_collection)) -> Scale:
     if scale.category == DEFAULT_SCALE_NAME_CHANGE_PREVENT:
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Категория не может быть 'Default'")
-    
+
     scale.owner_id = str(current_user.id)
-    
+
     scale_data = scale.model_dump(exclude={"id"})
     result = collection.insert_one(scale_data)
     created_scale = collection.find_one({"_id": result.inserted_id})

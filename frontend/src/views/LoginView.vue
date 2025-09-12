@@ -32,8 +32,7 @@
         <button 
           type="submit" 
           class="btn login-btn w-100"
-          :disabled="!isFormValid"
-        >
+          :disabled="!isFormValid">
           Войти
         </button>
       </form>
@@ -48,16 +47,18 @@
   </div>
 </template>
 
-<script>
+<script setup>
 import { useAuthStore } from '@/utils/auth_store';
+</script>
 
+<script>
 export default {
   name: 'Login View',
   data() {
     return {
       username: '',
       password: '',
-      loading: false,
+
       error_message: ''
     }
   },
@@ -68,9 +69,10 @@ export default {
   },
   methods: {
     async handleLogin() {
-      const authStore = useAuthStore();
-      await authStore.login(this.username, this.password);
-      this.error_message = authStore.error_message;
+      this.loading = true;
+      await useAuthStore().login(this.username, this.password);
+      this.error_message = useAuthStore().error_message;
+      this.loading = false;
     },
     async redirectToRegister() {
       this.$router.push('/register');

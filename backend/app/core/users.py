@@ -28,7 +28,7 @@ async def edit_user_me(data: Annotated[UserEditForm, Form()],
         current_user_objectId = ObjectId(current_user.id)
     except InvalidId:
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Неверный id")
-    
+
     if data.username != current_user.username and collection.count_documents({"username": data.username}) > 0:
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Пользователь с таким именем уже существует")
 
@@ -53,7 +53,7 @@ async def get_my_scales(current_user: Annotated[User, Depends(get_current_active
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Длина должна быть больше нуля или ноль")
     if page is not None and page < 1:
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Номер страницы должен быть больше нуля")
-    
+
     user_id = current_user.id
 
     my_scales_amount = collection.count_documents({"owner_id": user_id, "name": { "$regex": query }})
@@ -67,7 +67,7 @@ async def get_my_scales(current_user: Annotated[User, Depends(get_current_active
     return {
         "pages": pages_count,
         "scales": [Scale(**doc) for doc in scales_list]
-        }
+    }
 
 
 @user_router.get("/{user_id}")
