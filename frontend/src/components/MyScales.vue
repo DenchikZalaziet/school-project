@@ -5,6 +5,7 @@
       <div class="controls d-flex align-items-center">
         <div class="search-box">
           <input type="text" class="form-control" placeholder="Искать по названию..." v-model="searchQuery">
+          <button type="button" class="btn btn-primary" @click="$router.push('/scales/create')">Создать гамму</button>
         </div>
       </div>
     </div>

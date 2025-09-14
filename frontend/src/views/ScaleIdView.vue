@@ -57,7 +57,7 @@
 													max="12"
 													@change="scale_info_changed = true"
 													style="width: 80px">
-												<span class="text-nowrap">полутонов</span>
+												<span class="text-nowrap">{{ intervalName(interval) }}</span>
 											</div>
 											
 											<button v-if="is_my_scale" 
@@ -124,6 +124,21 @@ export default {
     }
   },
   methods: {
+    intervalName(interval) {
+      const lastDigit = interval % 10;
+      const lastTwoDigits = interval % 100;
+      let form;
+      if (lastTwoDigits >= 11 && lastTwoDigits <= 14) {
+          form = 'полутонов';
+      } else if (lastDigit === 1) {
+          form = 'полутон';
+      } else if (lastDigit >= 2 && lastDigit <= 4) {
+          form = 'полутона';
+      } else {
+          form = 'полутонов';
+      };
+      return `${form}`;
+    },
     addInterval(value) {
 			this.current_intervals.push(value);
     },
