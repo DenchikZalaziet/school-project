@@ -78,7 +78,19 @@ def test_get_instrument_notes_in_a_scale():
 
 
 def test_instrument_notes_routes(client):
-    scale = Scale(name="Minor Pentatonic", intervals=[3, 2, 2, 3])
+    response = client.post("/auth/register", data={
+        "username": "test_user",
+        "password": "secure_password123"
+    })
+    assert response.status_code == 201
+    token = response.json()["access_token"]
+
+    response = client.post("/scale", headers={"Authorization": f"Bearer {token}"}, json={
+        "name": "test_scale",
+        "intervals": [3, 2, 2, 3]
+    })
+    assert response.status_code == 201
+    scale_id = response.json()["_id"]
 
     response = client.get("/instrument/guitar/standard")
     assert response.status_code == 200
@@ -98,8 +110,7 @@ def test_instrument_notes_routes(client):
                                ['B', 'C', 'D♭', 'D', 'E♭', 'E', 'F', 'G♭', 'G', 'A♭', 'A', 'B♭', 'B', 'C', 'D♭', 'D', 'E♭', 'E', 'F', 'G♭', 'G', 'A♭', 'A'],
                                ['E', 'F', 'G♭', 'G', 'A♭', 'A', 'B♭', 'B', 'C', 'D♭', 'D', 'E♭', 'E', 'F', 'G♭', 'G', 'A♭', 'A', 'B♭', 'B', 'C', 'D♭', 'D']]
 
-    response = client.get("/instrument/guitar/standard/scale", params={
-        "intervals": scale.intervals,
+    response = client.get(f"/instrument/guitar/standard/{scale_id}", params={
         "root": "A"
     })
     assert response.status_code == 200
@@ -110,8 +121,7 @@ def test_instrument_notes_routes(client):
                                ['-', 'C', '-', 'D', '-', 'E', '-', '-', 'G', '-', 'A', '-', '-', 'C', '-', 'D', '-', 'E', '-', '-', 'G', '-', 'A'],
                                ['E', '-', '-', 'G', '-', 'A', '-', '-', 'C', '-', 'D', '-', 'E', '-', '-', 'G', '-', 'A', '-', '-', 'C', '-', 'D']]
 
-    response = client.get("/instrument/guitar/standard/scale", params={
-        "intervals": scale.intervals,
+    response = client.get(f"/instrument/guitar/standard/{scale_id}", params={
         "root": "B♭",
         "prefer_flats": True
     })
@@ -123,14 +133,20 @@ def test_instrument_notes_routes(client):
                                ['-', '-', 'D♭', '-', 'E♭', '-', 'F', '-', '-', 'A♭', '-', 'B♭', '-', '-', 'D♭', '-', 'E♭', '-', 'F', '-', '-', 'A♭', '-'],
                                ['-', 'F', '-', '-', 'A♭', '-', 'B♭', '-', '-', 'D♭', '-', 'E♭', '-', 'F', '-', '-', 'A♭', '-', 'B♭', '-', '-', 'D♭', '-']]
 
-    response = client.get("/instrument/guitar/standard/scale", params={
-        "intervals": [],
-        "root": "A"
+    response = client.post("/scale", headers={"Authorization": f"Bearer {token}"}, json={
+        "name": "empty_scale",
+        "intervals": []
     })
-    assert response.status_code == 422
+    assert response.status_code == 201
+    scale_id = response.json()["_id"]
 
-    response = client.get("/instrument/guitar/standard/scale", params={
-        "intervals": [-1],
+    response = client.get(f"/instrument/guitar/standard/{scale_id}", params={
         "root": "A"
     })
-    assert response.status_code == 422
+    assert response.status_code == 200
+    assert response.json() ==[['-', '-', '-', '-', '-', 'A', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-', 'A', '-', '-', '-', '-', '-'], 
+                              ['A', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-', 'A', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-'], 
+                              ['-', '-', '-', '-', '-', '-', '-', 'A', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-', 'A', '-', '-', '-'], 
+                              ['-', '-', 'A', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-', 'A', '-', '-', '-', '-', '-', '-', '-', '-'], 
+                              ['-', '-', '-', '-', '-', '-', '-', '-', '-', '-', 'A', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-', 'A'], 
+                              ['-', '-', '-', '-', '-', 'A', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-', 'A', '-', '-', '-', '-', '-']]

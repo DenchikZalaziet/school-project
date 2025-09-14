@@ -64,13 +64,14 @@ export default {
   },
   computed: {
     isFormValid() {
-      return this.username.trim() !== '' && this.password.trim() !== '';
+      return this.username.trim() && 
+      this.password.trim();
     }
   },
   methods: {
     async handleLogin() {
       this.loading = true;
-      await useAuthStore().login(this.username, this.password);
+      await useAuthStore().login(this.username.trim(), this.password);
       this.error_message = useAuthStore().error_message;
       this.loading = false;
     },

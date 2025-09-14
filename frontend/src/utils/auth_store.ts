@@ -62,7 +62,7 @@ export const useAuthStore = defineStore('auth', {
         } else {
           this.error_message = "Произошла ошибка";
         };
-        console.log(error);
+        console.error(error);
       })
       .finally(() => {
         this.loading = false;
@@ -94,7 +94,7 @@ export const useAuthStore = defineStore('auth', {
         } else {
           this.error_message = "Произошла ошибка";
         };
-        console.log(error);
+        console.error(error);
       })
       .finally(() => {
         this.loading = false;
@@ -130,7 +130,7 @@ export const useAuthStore = defineStore('auth', {
         } else {
             this.error_message = "Произошла ошибка";
         };
-        console.log(error);
+        console.error(error);
       })
       .finally(() => {
         this.loading = false;

@@ -9,6 +9,7 @@ app.use(createPinia())
 
 useAuthStore().setup()
 useAuthStore().$subscribe((mutation, state) => {
+  localStorage.setItem('token', state.token)
   localStorage.setItem('user', JSON.stringify(state.user))
 })
 

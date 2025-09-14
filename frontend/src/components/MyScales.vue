@@ -75,7 +75,7 @@ export default {
         this.paginatedScales = response.data["scales"];
       })
       .catch (error => {
-        console.log(error);
+        console.error(error);
       })
       .finally(() => {
         this.loading = false;

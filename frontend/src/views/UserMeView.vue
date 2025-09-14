@@ -81,7 +81,9 @@ export default {
   },
   computed: {
     isFormValid() {
-      return this.user_info_changed && this.current_username.length > 0;
+      return !this.loading && 
+      this.user_info_changed && 
+      this.current_username != '';
     }
   },
   methods: { 
@@ -95,7 +97,7 @@ export default {
       await api.patch('/user/me', 
         formData, {
         headers: { 
-            "Content-Type": "multipart/form-data"
+            'Content-Type': 'multipart/form-data'
         }
       })
       .then (response => {
@@ -105,7 +107,7 @@ export default {
       })
       .catch (error => {
         this.error_message = error.response?.data?.detail | "Произошла ошибка";
-        console.log(error);
+        console.error(error);
       })
       .finally(() => {
         this.loading = false;

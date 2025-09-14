@@ -8,82 +8,91 @@
         </div>
 
         <div v-else class="row justify-content-center">
-          <div class="col-md-10">
-            <div class="mb-4">
-              <label for="scaleName" class="form-label fw-bold">Название</label>
-              <input type="text"
-                class="form-control form-control-lg custom-input scale-name" 
-                id="scaleName" 
-                @change="scale_info_changed = true"
-                v-model="current_name"
-                placeholder="Имя"
-                :disabled="!is_my_scale"
-							>
-            </div>
-
-            <div class="mb-4">
-              <label for="scaleCategory" class="form-label fw-bold">Категория</label>
-              <div class="by-1">
-                <span class="badge rounded-pill mx-2">{{ current_category }}</span>
+          <form @submit.prevent="submitScale">
+            <div class="col-md-10">
+              <div class="mb-4">
+                <label for="scaleName" class="form-label fw-bold">Название</label>
+                <input type="text"
+                  class="form-control form-control-lg custom-input scale-name" 
+                  id="scaleName" 
+                  @change="scale_info_changed = true"
+                  v-model="current_name"
+                  maxlength="20"
+                  placeholder="Имя"
+                  :disabled="!is_my_scale"
+                >
               </div>
-            </div>
 
-            <div class="mb-4">
-              <label for="scaleDescription" class="form-label fw-bold">Описание</label>
-              <textarea class="form-control custom-input scale-description" 
-                id="scaleDescription" 
-                rows="3"
-                @change="scale_info_changed = true"
-                v-model="current_description"
-                placeholder="Описание"
-                :disabled="!is_my_scale"
-							>
-            	</textarea>
-            </div>
+              <div class="mb-4">
+                <label for="scaleCategory" class="form-label fw-bold">Категория</label>
+                <div class="by-1">
+                  <span class="badge rounded-pill mx-2">{{ current_category }}</span>
+                </div>
+              </div>
 
-            <div class="mb-4">
-              <label class="form-label fw-bold">Интервалы</label>
-							<div class="intervals-container">
-								<form @submit.prevent="submitScale">
-									<div v-for="(interval, index) in current_intervals" :key="index" class="interval-item p-3 mb-2 rounded">
-										<div class="d-flex align-items-center justify-content-between">
-											<span v-if="!is_my_scale" class="interval-number fs-5 fw-bold">{{ interval }}</span>
-											
-											<div v-else class="d-flex align-items-center gap-2">
-												<input type="number" 
-													class="form-control interval-input" 
-													v-model.number="current_intervals[index]"
-													min="0" 
-													max="12"
-													@change="scale_info_changed = true"
-													style="width: 80px">
-												<span class="text-nowrap">{{ intervalName(interval) }}</span>
-											</div>
-											
-											<button v-if="is_my_scale" 
-												type="button" 
-												class="btn btn-outline-danger btn-sm remove-button"
-												@click="removeInterval(index); scale_info_changed = true">
-												X
-											</button>
-										</div>
-									</div>
-									
-									<button v-if="is_my_scale" 
-										type="button" 
-										class="btn btn-primary mt-2"
-										@click="addInterval(1); scale_info_changed = true">
-										Добавить интервал
-									</button>
+              <div class="mb-4">
+                <label for="scaleDescription" class="form-label fw-bold">Описание</label>
+                <textarea class="form-control custom-input scale-description" 
+                  id="scaleDescription" 
+                  rows="3"
+                  @change="scale_info_changed = true"
+                  v-model="current_description"
+                  maxlength="100"
+                  placeholder="Описание"
+                  :disabled="!is_my_scale"
+                >
+                </textarea>
+              </div>
 
-									<div v-if="is_my_scale" class="d-flex gap-2 justify-content-end mt-4">
-										<button type="submit" class="btn btn-success form-btn mx-4 px-4" :disabled="!isFormValid">Сохранить</button>
-										<button type="button" class="btn btn-danger form-btn" @click="deleteScale">Удалить</button>
-									</div>
-								</form>
-							</div>
-						</div>
-					</div>
+              <div class="mb-4">
+                <label class="form-label fw-bold">Интервалы</label>
+                <div class="intervals-container">
+                  <div v-for="(interval, index) in current_intervals" :key="index" class="interval-item p-3 mb-2 rounded">
+                    <div class="d-flex align-items-center justify-content-between">
+                      <span v-if="!is_my_scale" class="interval-number fs-5">{{ interval + ' ' + intervalName(interval) }}</span>
+                      
+                      <div v-else class="d-flex align-items-center gap-2">
+                        <input type="number" 
+                          class="form-control interval-input" 
+                          v-model.number="current_intervals[index]"
+                          min="0" 
+                          max="12"
+                          @change="scale_info_changed = true"
+                          style="width: 80px">
+                        <span class="text-nowrap fs-5">{{ intervalName(interval) }}</span>
+                      </div>
+                      
+                      <button v-if="is_my_scale" 
+                        type="button" 
+                        class="btn btn-outline-danger btn-sm remove-button"
+                        @click="removeInterval(index); scale_info_changed = true"
+                        :disabled="current_intervals.length <= 1">
+                        X
+                      </button>
+                    </div>
+                  </div>
+                    
+                  <button v-if="is_my_scale" 
+                    type="button" 
+                    class="btn btn-primary mt-2"
+                    @click="addInterval(1); scale_info_changed = true">
+                    Добавить интервал
+                  </button>
+
+                  <div v-if="is_my_scale" class="d-flex gap-2 justify-content-end mt-4">
+                    <button type="submit" class="btn btn-success form-btn mx-4 px-4" :disabled="!isFormValid">
+                    <span v-if="loading" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                    {{ loading ? 'Сохранение...' : 'Сохранить' }}
+                    </button>
+                    <button type="button" class="btn btn-outline-secondary form-btn" @click="resetForm">
+                      Сбросить
+                    </button>
+                    <button type="button" class="btn btn-danger form-btn" @click="deleteScale">Удалить</button>
+                  </div>
+                </div>
+						  </div>
+					  </div>
+          </form>
 				</div>
 			</div>
 		</div>
@@ -104,6 +113,7 @@ export default {
       error_message: '',
       no_content: false,
       no_content_message: '',
+      loading: false,
 
       scale_info_changed: false,
 
@@ -115,12 +125,19 @@ export default {
       current_category: '',
       current_intervals: [],
 
-      loading: false
+      saved_name: '',
+      saved_description: '',
+      saved_category: '',
+      saved_intervals: [],
     }
   },
   computed: {
     isFormValid() {
-      return this.scale_info_changed;
+      return !this.loading &&
+      this.scale_info_changed && 
+      this.current_name.trim() &&
+      this.current_category.trim() &&
+      this.current_intervals != [];
     }
   },
   methods: {
@@ -137,13 +154,20 @@ export default {
       } else {
           form = 'полутонов';
       };
-      return `${form}`;
+      return form;
     },
     addInterval(value) {
 			this.current_intervals.push(value);
     },
     removeInterval(index) {
 			this.current_intervals.splice(index, 1);
+    },
+    resetForm() {
+      this.current_name = this.saved_name;
+      this.current_description = this.saved_description;
+      this.current_category = this.saved_category;
+      this.current_intervals = this.saved_intervals;
+      this.scale_info_changed = false;
     },
     async getScale() {
 			this.loading = true;
@@ -156,23 +180,31 @@ export default {
 			.then(response => {
 				this.error_message = '';
 				this.no_content_message = '';
+
 				if (response.status == 204) {
 					console.log(response.data);
 					this.no_content = true;
 					this.no_content_message = 'Ничего не найдено!';
 					return;
 				};
+
 				let scale = response.data;
 				if (response.data["owner_id"] == useAuthStore().user._id) {
 						this.is_my_scale = true;
 				};
-				this.current_name = scale["name"];
-				this.current_description = scale["description"];
-				this.current_category = scale["category"];
-				this.current_intervals = scale["intervals"];
+
+				this.saved_name = scale["name"];
+				this.saved_description = scale["description"];
+				this.saved_category = scale["category"];
+				this.saved_intervals = [...scale["intervals"]];
+
+        this.current_name = this.saved_name;
+        this.current_description = this.saved_description;
+        this.current_category = this.saved_category;
+        this.current_intervals = [...this.saved_intervals];
 			})
 			.catch(error => {
-				console.log(error);
+				console.error(error);
 				this.error_message = error.response?.data?.detail | "Произошла ошибка";
 				if (error.response?.status == 403) {
 						this.no_content = true;
@@ -186,24 +218,30 @@ export default {
     async submitScale() {
 			this.loading = true;
       const data = {
-        name: this.current_name,
-        description: this.current_description,
-        category: this.current_category,
+        name: this.current_name.trim(),
+        description: this.current_description.trim(),
+        category: this.current_category.trim(),
         intervals: this.current_intervals
       };
       await api.patch(`/scale/${this.scale_id}`, 
         data, {
         headers: { 
-          "Content-Type": "application/json"
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${useAuthStore().token}`
         }
       })
       .then (response => {
         this.error_message = '';
         this.scale_info_changed = false;
+
+        this.saved_name = this.current_name;
+        this.saved_description = this.current_description;
+        this.saved_category = this.current_category;
+        this.saved_intervals = [...this.current_intervals];
       })
       .catch (error => {
         this.error_message = error.response?.data?.detail | "Произошла ошибка";
-        console.log(error);
+        console.error(error);
       })
 			.finally(() => {
 				this.loading = false;
@@ -218,7 +256,7 @@ export default {
       })
       .catch (error => {
         this.error_message = error.response?.data?.detail | "Произошла ошибка";
-        console.log(error);
+        console.error(error);
       })
 			.finally(() => {
 				this.loading = false;

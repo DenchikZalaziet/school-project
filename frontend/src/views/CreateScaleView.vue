@@ -12,45 +12,47 @@
         </div>
 
         <div class="row justify-content-center">
-          <div class="col-md-10">
-            <h2 class="mb-4">Создание новой музыкальной гаммы</h2>
-            
-            <div class="mb-4">
-              <label for="scaleName" class="form-label fw-bold">Название</label>
-              <input type="text"
-                class="form-control form-control-lg custom-input scale-name" 
-                id="scaleName" 
-                v-model="current_name"
-                placeholder="Введите название гаммы"
-                required
-							>
-            </div>
+          <form @submit.prevent="submitScale">
+            <div class="col-md-10">
+              <h2 class="mb-4">Создание гаммы</h2>
+              <div class="mb-4">
+                <label for="scaleName" class="form-label fw-bold">Название</label>
+                <input type="text"
+                  class="form-control form-control-lg custom-input scale-name" 
+                  id="scaleName" 
+                  v-model="current_name"
+                  maxlength="20"
+                  placeholder="Введите название гаммы"
+                  required
+                >
+              </div>
 
-            <div class="mb-4">
-              <label for="scaleCategory" class="form-label fw-bold">Категория</label>
-              <input type="text"
-                class="form-control custom-input" 
-                id="scaleCategory" 
-                v-model="current_category"
-                placeholder="Введите категорию гаммы"
-                required
-							>
-            </div>
+              <div class="mb-4">
+                <label for="scaleCategory" class="form-label fw-bold">Категория</label>
+                <input type="text"
+                  class="form-control custom-input" 
+                  id="scaleCategory" 
+                  v-model="current_category"
+                  maxlength="20"
+                  placeholder="Введите категорию гаммы"
+                  required
+                >
+              </div>
 
-            <div class="mb-4">
-              <label for="scaleDescription" class="form-label fw-bold">Описание</label>
-              <textarea class="form-control custom-input scale-description" 
-                id="scaleDescription" 
-                rows="3"
-                v-model="current_description"
-                placeholder="Опишите особенности этой гаммы"
-              ></textarea>
-            </div>
+              <div class="mb-4">
+                <label for="scaleDescription" class="form-label fw-bold">Описание</label>
+                <textarea class="form-control custom-input scale-description" 
+                  id="scaleDescription" 
+                  rows="3"
+                  v-model="current_description"
+                  maxlength="100"
+                  placeholder="Опишите особенности этой гаммы"
+                ></textarea>
+              </div>
 
-            <div class="mb-4">
-              <label class="form-label fw-bold">Интервалы (в полутонах)</label>
-              <div class="intervals-container">
-                <form @submit.prevent="submitScale">
+              <div class="mb-4">
+                <label class="form-label fw-bold">Интервалы</label>
+                <div class="intervals-container">
                   <div v-for="(interval, index) in current_intervals" :key="index" class="interval-item p-3 mb-2 rounded">
                     <div class="d-flex align-items-center justify-content-between">
                       <div class="d-flex align-items-center gap-2">
@@ -61,7 +63,7 @@
                           max="12"
                           required
                           style="width: 80px">
-                        <span class="text-nowrap">{{ intervalName(interval) }}</span>
+                        <span class="text-nowrap fs-5">{{ intervalName(interval) }}</span>
                       </div>
                       
                       <button type="button" 
@@ -80,7 +82,7 @@
                   </button>
 
                   <div class="d-flex gap-2 justify-content-end mt-4">
-                    <button type="submit" class="btn btn-success form-btn mx-4 px-4" :disabled="loading">
+                    <button type="submit" class="btn btn-success form-btn mx-4 px-4" :disabled="!isFormValid">
                       <span v-if="loading" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
                       {{ loading ? 'Создание...' : 'Создать гамму' }}
                     </button>
@@ -88,10 +90,10 @@
                       Сбросить
                     </button>
                   </div>
-                </form>
+                </div>
               </div>
             </div>
-          </div>
+          </form>
         </div>
       </div>
     </div>
@@ -116,7 +118,15 @@ export default {
       current_name: '',
       current_description: '',
       current_category: '',
-      current_intervals: [1, 1]
+      current_intervals: [1]
+    }
+  },
+  computed: {
+    isFormValid() {
+      return !this.loading &&
+      this.current_name.trim() && 
+      this.current_category.trim() &&
+      this.current_intervals != [];
     }
   },
   methods: {
@@ -133,7 +143,7 @@ export default {
       } else {
           form = 'полутонов';
       };
-      return `${form}`;
+      return form;
     },
     addInterval(value) {
       this.current_intervals.push(value);
@@ -147,47 +157,37 @@ export default {
       this.current_name = '';
       this.current_description = '';
       this.current_category = '';
-      this.current_intervals = [1, 1];
+      this.current_intervals = [1];
       this.error_message = '';
       this.success_message = '';
     },
     async submitScale() {
-      if (!this.current_name.trim()) {
-        this.error_message = 'Название гаммы обязательно для заполнения';
-        return;
-      }
-      
-      if (!this.current_category.trim()) {
-        this.error_message = 'Категория гаммы обязательна для заполнения';
-        return;
-      }
-
       const data = {
-        name: this.current_name,
-        description: this.current_description,
-        category: this.current_category,
+        name: this.current_name.trim(),
+        description: this.current_description.trim(),
+        category: this.current_category.trim(),
         intervals: this.current_intervals
       };
       
       this.loading = true;
       
-      try {
-        const response = await api.post('scale', data, {
-          headers: { 
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${useAuthStore().token}`
-          }
-        });
-        
+      await api.post('scale', data, {
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${useAuthStore().token}`
+        }
+      })
+      .then(response => {
         this.success_message = 'Гамма успешно создана!';
         this.resetForm();
-        
-      } catch (error) {
+      })
+      .catch (error => {
         console.error(error);
-        this.error_message = error.response?.data?.detail || "Произошла ошибка при создании гаммы";
-      } finally {
+        this.error_message = error.response?.data?.detail || "Произошла ошибка";
+      })
+      .finally (() => {
         this.loading = false;
-      }
+      });
     }
   }
 }
