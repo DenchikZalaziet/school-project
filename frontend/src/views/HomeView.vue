@@ -13,14 +13,5 @@ export default {
 }
 </script>
 
-<style>
-:root {
-  --primary-blue: #4da6ff;
-  --dark-blue: #2c7db6;
-  --light-blue: #e0f7ff;
-  --border-blue: #c1e3ff;
-}
-</style>
-
 <style scoped>
 </style>

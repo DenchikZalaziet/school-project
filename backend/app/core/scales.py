@@ -6,7 +6,7 @@ from fastapi import Depends, HTTPException, APIRouter
 from pymongo import MongoClient
 from starlette import status
 
-from backend.app.utils.auth_utils import get_current_active_user
+from backend.app.utils.auth_utils import get_current_active_user, get_optional_active_user
 from backend.app.utils.db_utils import get_scales_collection
 from backend.app.utils.notes_utils import get_scale_notes
 from backend.app.utils.loader import DEFAULT_SCALE_NAME_CHANGE_PREVENT
@@ -56,7 +56,7 @@ async def get_public_scales(length: int = 0, page: int = 1, query: str = "",
 
 @scales_router.get("/{scale_id}")
 async def get_scale_by_id(scale_id: str,
-                          current_user: Annotated[User, Depends(get_current_active_user)],
+                          current_user: Annotated[User, Depends(get_optional_active_user)],
                           collection=Depends(get_scales_collection)) -> Scale:
     try:
         scale = collection.find_one({"_id": ObjectId(scale_id)})
@@ -64,13 +64,19 @@ async def get_scale_by_id(scale_id: str,
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Неверный id")
 
     if not scale:
-        raise HTTPException(status_code=status.HTTP_204_NO_CONTENT)
+        raise HTTPException(status_code=status.HTTP_204_NO_CONTENT, detail="Гамма не найдена")
 
     found_scale = Scale(**scale)
-    if not found_scale.public:
-        user_id = current_user.id
-        if found_scale.owner_id != user_id:
-            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Гамма не может быть просмотрена текущим пользователем")
+
+    if found_scale.public:
+        return found_scale
+
+    if current_user is None:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Приватная гамма не может быть просмотрена без входа в аккаунт")
+
+    user_id = current_user.id
+    if found_scale.owner_id != user_id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Гамма не может быть просмотрена текущим пользователем")
     return found_scale
 
 

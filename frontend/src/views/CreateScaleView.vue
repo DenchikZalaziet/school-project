@@ -123,10 +123,10 @@ export default {
   },
   computed: {
     isFormValid() {
-      return !this.loading &&
-      this.current_name.trim() && 
-      this.current_category.trim() &&
-      this.current_intervals != [];
+      return !this.loading 
+      && this.current_name.trim() 
+      && this.current_category.trim() 
+      && this.current_intervals != [];
     }
   },
   methods: {

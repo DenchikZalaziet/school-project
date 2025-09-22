@@ -56,6 +56,7 @@ import { useAuthStore } from '@/utils/auth_store';
 const pageLength = 10;
 
 export default {
+  name: 'My Scales',
   extends: Scales,
   methods: {
     async loadScalesPage() {

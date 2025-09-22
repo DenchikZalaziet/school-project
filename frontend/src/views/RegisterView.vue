@@ -65,8 +65,8 @@ export default {
   },
   computed: {
     isFormValid() {
-      return this.username.trim() && 
-      this.password.trim();
+      return this.username.trim()
+      && this.password.trim();
     }
   },
   methods: {

@@ -11,13 +11,12 @@
   </div>
 </template>
 
-
 <script setup>
 </script>
 
 <script>
 export default {
-  name: '404 View',
+  name: '404 Error View',
 }
 </script>
 

@@ -21,6 +21,8 @@ export const useAuthStore = defineStore('auth', {
   actions: {
     async setup() {
       this.loading = true;
+      this.error_message = '';
+
       await api.get('/user/me', {
         headers: { 
           'Content-Type': 'application/x-www-form-urlencoded', 
@@ -31,6 +33,12 @@ export const useAuthStore = defineStore('auth', {
         this.user = response.data;
       })
       .catch(error => {
+         if (error.response?.data?.detail) {
+          this.error_message = error.response.data.detail;
+        } else {
+          this.error_message = "Произошла ошибка";
+        };
+        console.error(error);
         this.token = null;
        })
       .finally(() => {
@@ -101,6 +109,7 @@ export const useAuthStore = defineStore('auth', {
       });
     },
     logout() {
+      this.error_message = '';
       this.token = null;
       this.user = null;
       localStorage.removeItem('token');
@@ -115,6 +124,8 @@ export const useAuthStore = defineStore('auth', {
     async fetchUser() {
       if (this.token == null) {return};
       this.loading = true;
+      this.error_message = '';
+
       await api.get('/user/me', {
         headers: { 
           'Content-Type': 'application/x-www-form-urlencoded',

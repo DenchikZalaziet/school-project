@@ -55,7 +55,8 @@ def get_user_in_db_by_id(id: str, collection: MongoClient) -> Optional[UserInDB]
     return UserInDB(**db_user)
 
 
-async def get_current_user(token: Annotated[str, Depends(OAUTH2_SCHEME)], collection: MongoClient = Depends(get_users_collection)) -> User:
+async def get_current_user(token: Annotated[str, Depends(OAUTH2_SCHEME)],
+                           collection: MongoClient = Depends(get_users_collection)) -> User:
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Не удалось подтвердить данные для входа",
@@ -77,5 +78,25 @@ async def get_current_user(token: Annotated[str, Depends(OAUTH2_SCHEME)], collec
 
 async def get_current_active_user(current_user: Annotated[User, Depends(get_current_user)]) -> User:
     if current_user.disabled:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Неактивный пользователь")
+    return current_user
+
+
+async def get_optional_current_user(token: Annotated[str, Depends(OAUTH2_SCHEME)],
+                                    collection: MongoClient = Depends(get_users_collection)) -> Optional[User]:
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        id = payload.get("sub")
+        if id is None:
+            return None
+        token_data = TokenData(id=id)
+    except JWTError:
+        return None
+    user = get_user_in_db_by_id(id=token_data.id, collection=collection)
+    return user
+
+
+async def get_optional_active_user(current_user: Optional[User] = Depends(get_optional_current_user)) -> Optional[User]:
+    if current_user is not None and current_user.disabled:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Неактивный пользователь")
     return current_user

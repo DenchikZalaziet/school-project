@@ -41,9 +41,8 @@ const routes: Array<RouteRecordRaw> = [
   },
   {
     path: '/scales/:scale_id',
-    name: 'Scale',
+    name: 'Scale By ID',
     component: ScaleIdView,
-    meta: { requiresAuth: true }
   },
   {
     path: '/scales/create',

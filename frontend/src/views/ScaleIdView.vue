@@ -101,6 +101,7 @@
 
 <script setup>
 import Header from '@/components/Header.vue';
+
 import api from '@/utils/axios';
 import { useAuthStore } from '@/utils/auth_store';
 </script>
@@ -133,11 +134,11 @@ export default {
   },
   computed: {
     isFormValid() {
-      return !this.loading &&
-      this.scale_info_changed && 
-      this.current_name.trim() &&
-      this.current_category.trim() &&
-      this.current_intervals != [];
+      return !this.loading
+      && this.scale_info_changed
+      && this.current_name.trim()
+      && this.current_category.trim()
+      && this.current_intervals != [];
     }
   },
   methods: {
@@ -166,7 +167,7 @@ export default {
       this.current_name = this.saved_name;
       this.current_description = this.saved_description;
       this.current_category = this.saved_category;
-      this.current_intervals = this.saved_intervals;
+      this.current_intervals = [...this.saved_intervals];
       this.scale_info_changed = false;
     },
     async getScale() {
@@ -189,7 +190,7 @@ export default {
 				};
 
 				let scale = response.data;
-				if (response.data["owner_id"] == useAuthStore().user._id) {
+				if (useAuthStore().user && response.data["owner_id"] == useAuthStore().user._id) {
 						this.is_my_scale = true;
 				};
 

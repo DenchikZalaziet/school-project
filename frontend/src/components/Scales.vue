@@ -54,7 +54,7 @@ import api from '@/utils/axios';
 const pageLength = 10;
 
 export default {
-  name: 'Scales',
+  name: 'Public Scales',
   data() {
     return {
         selectedCategory: "all",

@@ -61,8 +61,6 @@ import api from '@/utils/axios';
 import Header from '@/components/Header.vue'
 import MyScales from '@/components/MyScales.vue';
 import { useAuthStore } from '@/utils/auth_store';
-
-const authStore = useAuthStore();
 </script>
 
 <script>
@@ -81,9 +79,9 @@ export default {
   },
   computed: {
     isFormValid() {
-      return !this.loading && 
-      this.user_info_changed && 
-      this.current_username != '';
+      return !this.loading 
+      && this.user_info_changed 
+      && this.current_username != '';
     }
   },
   methods: { 
@@ -101,7 +99,7 @@ export default {
         }
       })
       .then (response => {
-        useAuthStore().fetchUser()
+        useAuthStore().fetchUser();
         this.error_message = '';
         this.user_info_changed = false;
       })

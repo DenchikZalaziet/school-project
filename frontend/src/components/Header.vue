@@ -7,12 +7,12 @@
         </a>
 
         <ul class="nav col-12 col-lg-auto me-lg-auto mb-2 justify-content-center mb-md-0">
-          <router-link :to="`/`" class="link"><a class="nav-link px-2 text-secondary nav-link">Главная</a></router-link>
-          <router-link :to="`/scales`" class="link"><a class="nav-link px-2 text-secondary nav-link">Гаммы</a></router-link>
+          <router-link :to="`/`" class="header-link"><a class="nav-link px-2 text-secondary">Главная</a></router-link>
+          <router-link :to="`/scales`" class="header-link"><a class="nav-link px-2 text-secondary">Гаммы</a></router-link>
         </ul>
 
         <div class="text-end" v-if="authStore.isAuthenticated">
-          <router-link :to="`/profile/me`" class="link">
+          <router-link :to="`/profile/me`" class="header-link">
             <a href="#" class="btn btn-outline-primary rounded-pill px-4 mx-2 shadow-sm">
               <i class="bi bi-person me-2"></i> {{ authStore.username }}
             </a>
@@ -48,7 +48,7 @@ export default {
 </script>
 
 <style scoped>
-.link { 
+.header-link { 
   text-decoration: none; 
 }
   
@@ -74,6 +74,7 @@ export default {
 }
 
 .nav-link:hover, .nav-link.active {
+  transform: translateY(-2px);
   color: var(--primary-blue);
 }
 
