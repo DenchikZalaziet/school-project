@@ -1,10 +1,10 @@
 <template>
-  <header class="p-3 border-bottom app-header">
+  <header class="p-2 border-bottom app-header">
     <div class="container">
       <div class="d-flex flex-wrap align-items-center justify-content-center justify-content-lg-start">
-        <a href="/" class="d-flex align-items-center mb-2 mb-lg-0 text-white text-decoration-none mx-4">
-          <img src="../public/logo.png" class="logo"  alt="Лого" width="60" height="60">
-        </a>
+        <router-link :to="`/profile/me`" class="logo-container d-flex lign-items-center">
+          <img src="../assets/logo.png" class="logo"  alt="Лого" width="70" height="70">
+        </router-link>
 
         <ul class="nav col-12 col-lg-auto me-lg-auto mb-2 justify-content-center mb-md-0">
           <router-link :to="`/`" class="header-link"><a class="nav-link px-2 text-secondary">Главная</a></router-link>
@@ -17,7 +17,7 @@
               <i class="bi bi-person me-2"></i> {{ authStore.username }}
             </a>
           </router-link>
-          <button type="button" class="btn btn-primary me-2" @click="logout">Выйти</button>
+          <button type="button" class="btn btn-primary mx-2" @click="logout">Выйти</button>
         </div>
 
         <div class="text-end" v-else>
@@ -63,6 +63,12 @@ export default {
   color: var(--primary-blue);
   font-size: 1.5rem;
   gap: 10px;
+  transition: all 0.1s;
+}
+
+.logo:hover, .logo.active {
+  transform: scale(1.1);
+  transition: all 0.3s;
 }
 
 .nav-link {

@@ -3,9 +3,9 @@
     <div class="header-controls mb-4">
       <h1 class="page-title">Мои гаммы</h1>
       <div class="controls d-flex align-items-center">
-        <div class="search-box">
+        <div class="search-box d-flex align-items-center">
           <input type="text" class="form-control" placeholder="Искать по названию..." v-model="searchQuery">
-          <button type="button" class="btn btn-primary" @click="$router.push('/scales/create')">Создать гамму</button>
+          <button type="button" class="btn btn-primary ms-4 px-2 w-75" @click="$router.push('/scales/create')">Создать гамму</button>
         </div>
       </div>
     </div>
@@ -198,5 +198,27 @@ export default {
 
 .scale-card {
   transition: all 0.3s ease, border-color 0.2s ease;
+}
+
+.btn-outline-primary {
+  color: var(--primary-blue);
+  border-color: var(--primary-blue);
+}
+
+.btn-outline-primary:hover {
+  background-color: var(--primary-blue);
+  color: white;
+}
+
+.btn-primary {
+  background-color: var(--primary-blue);
+  border-color: var(--primary-blue);
+  transition: all 0.3s;
+}
+
+.btn-primary:hover {
+  background-color: var(--dark-blue);
+  border-color: var(--dark-blue);
+  transform: translateY(-2px);
 }
 </style>

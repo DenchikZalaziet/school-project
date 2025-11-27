@@ -9,6 +9,7 @@ import UserMeView from '@/views/UserMeView.vue';
 import ScaleIdView from '@/views/ScaleIdView.vue';
 import CreateScaleView from '@/views/CreateScaleView.vue';
 import NotFound404View from '@/views/NotFound404View.vue';
+import InstrumentScaleView from '@/views/InstrumentScaleView.vue';
 
 
 
@@ -49,6 +50,11 @@ const routes: Array<RouteRecordRaw> = [
     name: 'Create Scale',
     component: CreateScaleView,
     meta: { requiresAuth: true }
+  },
+  {
+    path: '/instrument/:instrument/:tuning/:scale_id',
+    name: 'Instrument Scale Representation',
+    component: InstrumentScaleView,
   },
 
   // 404

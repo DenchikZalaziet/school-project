@@ -2,7 +2,7 @@
   <footer class="footer py-4">
     <div class="container text-center">
       <div class="mb-1">
-        <img src="../public/logo.png" alt="Logo" class="footer-logo" style="height: 60px;">
+        <img src="../assets/logo.png" alt="Logo" class="footer-logo" style="height: 60px;">
       </div>
       
       <ul class="nav justify-content-center mb-3">

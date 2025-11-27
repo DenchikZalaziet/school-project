@@ -4,8 +4,8 @@
     <div class="card-body p-4">
       <form @submit.prevent="submitUserInfo">
         <div class="mb-4">
-          <label for="usernameInput" class="ms-2 col-form-label-lg">
-          <i class="bi bi-person me-2"></i>Имя
+          <label for="usernameInput" class="ms-2 form-label fw-bold">
+            <i class="bi bi-person me-2"></i>Имя
           </label>
           <input 
             type="text" 
@@ -24,7 +24,7 @@
         </div>
 
         <div class="mb-4">
-          <label for="usernameInput" class="ms-2 col-form-label-lg">
+          <label for="usernameInput" class="ms-2 form-label fw-bold">
             <i class="bi bi-person me-2"></i>Описание
           </label>
           <textarea 
@@ -115,7 +115,11 @@ export default {
 }
 </script>
 
-<style scoped> 
+<style scoped>
+.form-label {
+  font-size: 1.2rem;
+}
+
 .submit-btn {
   background-color: #ffffff;
   padding: 10px;

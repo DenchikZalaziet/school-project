@@ -82,10 +82,12 @@
                   </button>
 
                   <div class="d-flex gap-2 justify-content-end mt-4">
-                    <button type="submit" class="btn btn-success form-btn mx-4 px-4" :disabled="!isFormValid">
-                      <span v-if="loading" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                      {{ loading ? 'Создание...' : 'Создать гамму' }}
-                    </button>
+                    <router-link :to="`/profile/me`" class="header-link">
+                      <button type="submit" class="btn btn-success form-btn mx-4 px-4" :disabled="!isFormValid">
+                        <span v-if="loading" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                        {{ loading ? 'Создание...' : 'Создать гамму' }}
+                      </button>
+                    </router-link>
                     <button type="button" class="btn btn-outline-secondary form-btn" @click="resetForm">
                       Сбросить
                     </button>
