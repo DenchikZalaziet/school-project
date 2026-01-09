@@ -13,7 +13,7 @@ from backend.app.utils.db_utils import get_users_collection
 from backend.app.utils.hashing_utils import verify_password
 from backend.app.utils.loader import DEFAULT_ACCESS_TOKEN_EXPIRE_MINUTES, ALGORITHM, SECRET_KEY
 
-OAUTH2_SCHEME = OAuth2PasswordBearer(tokenUrl="auth")
+OAUTH2_SCHEME = OAuth2PasswordBearer(tokenUrl="auth", auto_error=False)
 
 
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -> str:
@@ -62,6 +62,8 @@ async def get_current_user(token: Annotated[str, Depends(OAUTH2_SCHEME)],
         detail="Не удалось подтвердить данные для входа",
         headers={"WWW-Authenticate": "Bearer"},
     )
+    if token is None:
+        raise credentials_exception
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         id = payload.get("sub")
@@ -84,6 +86,8 @@ async def get_current_active_user(current_user: Annotated[User, Depends(get_curr
 
 async def get_optional_current_user(token: Annotated[str, Depends(OAUTH2_SCHEME)],
                                     collection: MongoClient = Depends(get_users_collection)) -> Optional[User]:
+    if token is None:
+        return None
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         id = payload.get("sub")

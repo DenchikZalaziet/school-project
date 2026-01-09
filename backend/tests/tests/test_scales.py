@@ -43,7 +43,8 @@ def test_scale_notes():
 def test_full_scale_flow(client):
     response = client.post("/auth/register", data={
         "username": "test_user",
-        "password": "secure_password123"
+        "password": "secure_password123",
+        "public": True,
     })
     assert response.status_code == 201
     token = response.json()["access_token"]
@@ -117,9 +118,8 @@ def test_full_scale_flow(client):
 
     response = client.patch(f"/scale/{scale_id}", headers={"Authorization": f"Bearer {token}"}, json={
         "name": "edited_name",
-        "description": "edited_description"
+        "description": "edited_description",
     })
-    print(response.text)
     assert response.status_code == 204
 
     response = client.get(f"/scale/{scale_id}", headers={"Authorization": f"Bearer {token}"})
@@ -128,26 +128,32 @@ def test_full_scale_flow(client):
     assert response.json()["description"] == "edited_description"
     assert response.json()["category"] == "test"
 
-    response = client.get(f"/scale/{scale_id}/notes", params={"root": "A"})
+    response = client.get(f"/scale/{scale_id}/notes", headers={"Authorization": f"Bearer {token}"}, params={"root": "A"})
     assert response.status_code == 200
     assert response.json() == ['A', 'C', 'D', 'E', 'G']
 
-    response = client.get(f"/scale/{scale_id}/notes", params={"root": "A♯"})
+    response = client.get(f"/scale/{scale_id}/notes", headers={"Authorization": f"Bearer {token}"}, params={"root": "A♯"})
     assert response.status_code == 200
     assert response.json() == ['A♯', 'C♯', 'D♯', 'F', 'G♯']
 
-    response = client.get(f"/scale/{scale_id}/notes", params={"root": "A♯", "prefer_flats": True})
+    response = client.get(f"/scale/{scale_id}/notes", headers={"Authorization": f"Bearer {token}"}, params={"root": "A♯", "prefer_flats": True})
     assert response.status_code == 200
     assert response.json() == ['B♭', 'D♭', 'E♭', 'F', 'A♭']
 
-    response = client.get(f"/scale/{scale_id}/notes", params={"root": ""})
+    response = client.get(f"/scale/{scale_id}/notes", headers={"Authorization": f"Bearer {token}"}, params={"root": ""})
     assert response.status_code == 422
 
-    response = client.get(f"/scale/{fake_scale_id}/notes", params={"root": "A"})
+    response = client.get(f"/scale/{fake_scale_id}/notes", headers={"Authorization": f"Bearer {token}"}, params={"root": "A"})
     assert response.status_code == 204
 
     response = client.delete(f"/scale/{fake_scale_id}", headers={"Authorization": f"Bearer {token}"})
     assert response.status_code == 204
+
+    response = client.delete(f"/scale/{scale_id}")
+    assert response.status_code == 401
+
+    response = client.get(f"/scale/{scale_id}", headers={"Authorization": f"Bearer {token}"})
+    assert response.status_code == 200
 
     response = client.delete(f"/scale/{scale_id}", headers={"Authorization": f"Bearer {token}"})
     assert response.status_code == 204

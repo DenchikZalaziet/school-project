@@ -1,16 +1,15 @@
-import math
-from typing import Annotated, Optional, Union
+from math import ceil
+from typing import Annotated, Union
 from bson import ObjectId
 from bson.errors import InvalidId
-from fastapi import Depends, HTTPException, Form, APIRouter, Response
+from fastapi import Depends, HTTPException, Form, APIRouter
 from pymongo import MongoClient
 from starlette import status
 
 from backend.app.schemas.scales_schemas import Scale
-from backend.app.utils.auth_utils import get_current_active_user, create_access_token
+from backend.app.utils.auth_utils import get_current_active_user
 from backend.app.utils.db_utils import get_users_collection, get_scales_collection
-from backend.app.schemas.user_schemas import User, UserEditForm, Token
-from backend.app.utils.loader import ACCESS_TOKEN_EXPIRE_MINUTES
+from backend.app.schemas.user_schemas import User, UserEditForm
 
 user_router = APIRouter(prefix="/user")
 
@@ -27,7 +26,7 @@ async def edit_user_me(data: Annotated[UserEditForm, Form()],
     try:
         current_user_objectId = ObjectId(current_user.id)
     except InvalidId:
-        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Неверный id")
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Неверный ID")
 
     if data.username != current_user.username and collection.count_documents({"username": data.username}) > 0:
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Пользователь с таким именем уже существует")
@@ -56,13 +55,13 @@ async def get_my_scales(current_user: Annotated[User, Depends(get_current_active
 
     user_id = current_user.id
 
-    my_scales_amount = collection.count_documents({"owner_id": user_id, "name": { "$regex": query }})
+    my_scales_amount = collection.count_documents({"owner_id": user_id, "name": {"$regex": query}})
     if length == 0:
         pages_count = my_scales_amount
     else:
-        pages_count = math.ceil(my_scales_amount / length)
+        pages_count = ceil(my_scales_amount / length)
 
-    my_scales_cursor = collection.find({"owner_id": user_id, "name": { "$regex": query }}).sort("name").skip(length * (page - 1)).limit(length)
+    my_scales_cursor = collection.find({"owner_id": user_id, "name": {"$regex": query}}).sort("name").skip(length * (page - 1)).limit(length)
     scales_list = my_scales_cursor.to_list()
     return {
         "pages": pages_count,
@@ -76,7 +75,7 @@ async def get_user_by_id(user_id: str,
     try:
         user = collection.find_one({"_id": ObjectId(user_id)})
     except InvalidId:
-        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Неверный id")
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Неверный ID")
     if not user:
         raise HTTPException(status_code=status.HTTP_204_NO_CONTENT)
     return User(**user)

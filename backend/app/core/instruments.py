@@ -1,41 +1,48 @@
-from typing import Annotated
 from bson import ObjectId
 from bson.errors import InvalidId
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException
 from starlette import status
 
-from backend.app.schemas.instruments_schemas import Guitar6StringStandard
-from backend.app.schemas.scales_schemas import Scale
-from backend.app.utils.db_utils import get_scales_collection
-from backend.app.utils.notes_utils import get_instrument_notes, get_instrument_notes_in_a_scale
+from backend.app.schemas.instruments_schemas import Instrument
+from backend.app.schemas.tuning_schemas import Tuning
+from backend.app.utils.db_utils import get_instruments_collection, get_instrument_tunings_collection
 
 instruments_router = APIRouter(prefix="/instrument")
 
 
-@instruments_router.get("/guitar/standard")
-def get_guitar_standard_notes(prefer_flats: bool = False):
-    instrument = Guitar6StringStandard
-    try:
-        return get_instrument_notes(instrument=instrument, prefer_flats=prefer_flats)
-    except ValueError:
-        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY)
+@instruments_router.get("/")
+def get_all_instruments(collection=Depends(get_instruments_collection)) -> list[Instrument]:
+    instruments= collection.find()
 
-
-@instruments_router.get("/guitar/standard/{scale_id}")
-def get_guitar_scale_notes(scale_id: str,
-                           root: str, 
-                           prefer_flats: bool = False,
-                           collection=Depends(get_scales_collection)):
-    instrument = Guitar6StringStandard
-
-    try:
-        scale = collection.find_one({"_id": ObjectId(scale_id)})
-    except InvalidId: 
-        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Неверный id")
-    
-    if not scale:
+    if not instruments:
         raise HTTPException(status_code=status.HTTP_204_NO_CONTENT)
-    
-    found_scale = Scale(**scale)
 
-    return get_instrument_notes_in_a_scale(instrument=instrument, scale=found_scale, scale_root=root, prefer_flats=prefer_flats)
+    return [Instrument(**doc) for doc in instruments.to_list()]
+
+
+@instruments_router.get("/{instrument_id}")
+def get_instrument_by_id(instrument_id: str,
+                         collection=Depends(get_instruments_collection)) -> Instrument:
+    try:
+        instrument = collection.find_one({"_id": ObjectId(instrument_id)})
+    except InvalidId:
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Неверный ID")
+
+    if not instrument:
+        raise HTTPException(status_code=status.HTTP_204_NO_CONTENT, detail="Инструмент не найден")
+
+    return Instrument(**instrument)
+
+
+@instruments_router.get("/{instrument_id}/tunings")
+def get_all_instrument_tunings(instrument_id: str,
+                               collection=Depends(get_instrument_tunings_collection)) -> list[Tuning]:
+    try:
+        tunings = collection.find({"instrument_id": instrument_id})
+    except InvalidId:
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Неверный ID")
+
+    if not tunings:
+        raise HTTPException(status_code=status.HTTP_204_NO_CONTENT)
+
+    return [Tuning(**doc) for doc in tunings.to_list()]

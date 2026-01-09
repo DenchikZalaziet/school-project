@@ -21,3 +21,13 @@ def get_users_collection(db=Depends(get_data_db)) -> MongoClient:
 def get_scales_collection(db=Depends(get_data_db)) -> MongoClient:
     collection = db.scales
     return collection
+
+
+def get_instruments_collection(db=Depends(get_data_db)) -> MongoClient:
+    collection = db.instruments
+    return collection
+
+
+def get_instrument_tunings_collection(db=Depends(get_data_db)) -> MongoClient:
+    collection = db.instrument_tunings
+    return collection

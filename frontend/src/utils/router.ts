@@ -30,13 +30,13 @@ const routes: Array<RouteRecordRaw> = [
     component: RegisterView
   },
   {
-    path: '/profile/me',
+    path: '/profile/me/',
     name: 'My Profile',
     component: UserMeView,
     meta: { requiresAuth: true }
   },
   {
-    path: '/scales',
+    path: '/scales/',
     name: 'Public Scales',
     component: ScalesView
   },
@@ -71,6 +71,7 @@ const router = createRouter({
 });
 
 router.beforeEach((to, from, next) => {
+  useAuthStore().fetchUser();
   if (to.meta.requiresAuth) {
     const isLoggedIn = useAuthStore().isAuthenticated;
     

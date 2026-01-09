@@ -2,9 +2,75 @@
   <Header></Header>
 
   <div class="container mt-4 p-1">
-    <div class="scale-controls">
+    <div class="selection-container mb-4 bg-white rounded-3 p-4 shadow-sm">
+      <div class="row g-4 align-items-end">
+        <div class="col-md-4">
+          <div class="form-group h-100 d-flex flex-column">
+            <label class="form-label fw-bold mb-3" style="color: var(--dark-blue);">
+              <i class="bi bi-guitar me-2"></i>Инструмент
+            </label>
+            <div class="dropdown-wrapper position-relative flex-grow-1" :class="{ 'loading': loading }">
+              <select 
+                v-model="current_instrument" 
+                @change="onInstrumentChange"
+                class="form-select custom-dropdown"
+                :disabled="loading"
+              >
+                <option value="" disabled>Выберите инструмент</option>
+                <option 
+                  v-for="instrument in all_instruments" 
+                  :key="instrument._id"
+                  :value="instrument"
+                >
+                  {{ instrument.name }}
+                </option>
+              </select>
+              <div v-if="loading" class="dropdown-loader">
+                <div class="spinner-border spinner-border-sm text-primary"></div>
+              </div>
+            </div>
+            <small v-if="current_instrument" class="text-muted mt-2 d-block">
+              {{ current_instrument.category }} • {{ current_instrument.description }}
+            </small>
+          </div>
+        </div>
+        
+        <div class="col-md-4">
+          <div class="form-group h-100 d-flex flex-column">
+            <label class="form-label fw-bold mb-3" style="color: var(--dark-blue);">
+              <i class="bi bi-music-note-list me-2"></i>Строй
+            </label>
+            <div class="dropdown-wrapper position-relative flex-grow-1" :class="{ 'loading': loading }">
+              <select 
+                v-model="current_tuning" 
+                @change="onTuningChange"
+                class="form-select custom-dropdown"
+                :disabled="!current_instrument || loading"
+              >
+                <option value="" disabled>Выберите строй</option>
+                <option 
+                  v-for="tuning in all_tunings" 
+                  :key="tuning._id"
+                  :value="tuning"
+                >
+                  {{ tuning.name }}
+                </option>
+              </select>
+              <div v-if="loading" class="dropdown-loader">
+                <div class="spinner-border spinner-border-sm text-primary"></div>
+              </div>
+            </div>
+            <small v-if="current_tuning" class="text-muted mt-2 d-block">
+              {{ current_tuning.description }}
+            </small>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="scale-controls" v-if="current_instrument && current_tuning">
       <div class="root-note-selector">
-        <label class="">Тоника:</label>
+        <label class="mb-2">Тоника:</label>
         <div class="note-buttons">
           <button 
             v-for="note in availableNotes" 
@@ -12,8 +78,8 @@
             class="note-button"
             :class="{ 
               'active': root === note,
-              'flat-note': note.includes('b'),
-              'sharp-note': note.includes('#')
+              'flat-note': note.includes('♭'),
+              'sharp-note': note.includes('♯')
             }"
             @click="root = note"
           >
@@ -41,12 +107,23 @@
           </button>
         </div>
       </div>
-      <button class="btn btn-primary" @click="getScaleNotes()">Применить</button>
+      <button class="btn btn-primary apply-btn" 
+        @click="getScaleNotes"
+        :disabled="!showFretboard || scaleLoading"
+        >
+        <span v-if="scaleLoading" class="spinner-border spinner-border-sm me-2"></span>
+        Применить
+      </button>
     </div>
   </div>
 
-  <div class="fretboard-container mt-1">
-    <div class="fretboard">
+  <div class="fretboard-container mt-4" v-if="showFretboard">
+    <div v-if="scaleLoading" class="text-center py-5">
+      <div class="spinner-border text-primary"></div>
+      <p class="mt-2 text-muted">Загружаем аппликатуру...</p>
+    </div>
+    
+    <div class="fretboard" v-else>
       <div 
         v-for="(stringNotes, stringIndex) in scale_notes" 
         :key="stringIndex"
@@ -54,7 +131,14 @@
         :style="{ '--string-thickness': calculateThickness(stringIndex) + 'px'}"
       >
         <div class="open-note">
-          <span class="note-label">{{ instrument_notes[stringIndex][0] }}</span>
+          <div class="fret-note" 
+            :class="{
+              'scale-note': stringNotes[0] !== '-',
+              'non-scale-note': stringNotes[0] === '-'
+            }">
+            <span class="note-label">{{ instrument_notes[stringIndex][0] }}</span>
+            <span v-if="stringNotes[0] !== '-'" class="scale-indicator">•</span>
+          </div>
         </div>
         
         <div class="nut"></div>
@@ -64,11 +148,12 @@
           :key="fretIndex"
           class="fret-cell"
         >
-          <div v-if="note == '-'" class="fret-note fret-missing-note">
+          <div v-if="note == '-'" class="fret-note non-scale-note">
             <span class="note-label">{{ instrument_notes[stringIndex][fretIndex + 1] }}</span>
           </div>
-          <div v-else class="fret-note">
+          <div v-else class="fret-note scale-note">
             <span class="note-label">{{ note }}</span>
+            <span class="root-indicator" v-if="note === root">R</span>
           </div>
         </div>
       </div>
@@ -103,56 +188,131 @@ export default {
       no_content: false,
       no_content_message: '',
       loading: false,
+      scaleLoading: false,
 
 			scale_id: this.$route.params.scale_id,
-			instrument_name: this.$route.params.instrument,
-			tuning_name: this.$route.params.tuning,
+			current_instrument: null,
+			current_tuning: null,
+
+      all_instruments: [],
+      all_tunings: [],
 
       prefer_flats: false,
       root: 'C',
 
-      instrument_notes: [[0]],
-      scale_notes: [[0]],
-      string_count: 0
+      instrument_notes: [],
+      scale_notes: [],
+      string_count: 0,
+      fretboard_length: 0,
     }
   },
   created() {
-    this.getInstrumentNotes();
-    this.getScaleNotes();
+    this.getInstruments();
   },
   computed: {
     availableNotes() {
-      return ["C", "C♯", "D", "D♯", "E", "F", "F♯", "G", "G♯", "A", "A♯", "B"];
+      if (this.prefer_flats) {
+        return ["C", "D♭", "D", "E♭", "E", "F", "G♭", "G", "A♭", "A", "B♭", "B"];
+      } else {
+        return ["C", "C♯", "D", "D♯", "E", "F", "F♯", "G", "G♯", "A", "A♯", "B"];
+      }
+    },
+    showFretboard() {
+      return this.instrument_notes.length > 0 && this.scale_notes.length > 0;
+    }
+  },
+  watch: {
+    prefer_flats() {
+      if (this.current_tuning) {
+        this.getInstrumentNotes();
+        if (this.scale_notes.length > 0) {
+          this.getScaleNotes();
+        }
+      }
     }
   },
 	methods: {
     calculateThickness(index) {
       return Math.min(1 + 0.5 * index, 10);
     },
+
+    async getInstruments() {
+      this.error_message = '';
+      this.loading = true;
+      api.get('/instrument') 
+      .then(response => {
+        this.all_instruments = [...response.data];
+      })
+      .catch(error => {
+        console.error(error);
+        this.error_message = error.response?.data?.detail || "Произошла ошибка";
+      })
+      .finally(() => {
+        this.loading = false;
+      });
+    },
+
+    async onInstrumentChange() {
+      this.current_tuning = null;
+      this.scale_notes = [];
+      this.all_tunings = [];
+      
+      if (this.current_instrument) {
+        this.string_count = this.current_instrument.number_of_strings;
+        this.fretboard_length = this.current_instrument.fretboard_length;
+        await this.getInstrumentTunings();
+      }
+    },
+
+    onTuningChange() {
+      if (this.current_tuning) {
+        this.getInstrumentNotes();
+        this.getScaleNotes();
+      }
+    },
+
+    async getInstrumentTunings() {
+      this.error_message = '';
+      this.loading = true;
+      api.get(`/instrument/${this.current_instrument._id}/tunings`) 
+      .then(response => {
+        this.all_tunings = [...response.data];
+      })
+      .catch(error => {
+        console.error(error);
+        this.error_message = error.response?.data?.detail || "Произошла ошибка";
+      })
+      .finally(() => {
+        this.loading = false;
+      });
+    },
+
     async getInstrumentNotes() {
       this.error_message = '';
       this.loading = true;
-      api.get(`/instrument/${this.instrument_name}/${this.tuning_name}`, {
+      api.get(`/notes/${this.current_tuning._id}`, {
         params: {
           prefer_flats: this.prefer_flats
         }
       })
       .then(response => {
         this.instrument_notes = [...response.data];
-        this.string_count = this.instrument_notes.length;
       })
       .catch(error => {
         console.error(error);
-        this.error_message = error.response?.data?.detail | "Произошла ошибка";
+        this.error_message = error.response?.data?.detail || "Произошла ошибка";
       })
       .finally(() => {
         this.loading = false;
       });
     },
-    async getScaleNotes() {
+
+    getScaleNotes() {
+      if (!this.current_tuning) return;
+      
       this.error_message = '';
-      this.loading = true;
-      api.get(`/instrument/${this.instrument_name}/${this.tuning_name}/${this.scale_id}`, {
+      this.scaleLoading = true;
+      api.get(`/notes/${this.current_tuning._id}/${this.scale_id}`, {
         params: {
           prefer_flats: this.prefer_flats,
           root: this.root
@@ -163,10 +323,10 @@ export default {
       })
       .catch(error => {
         console.error(error);
-        this.error_message = error.response?.data?.detail | "Произошла ошибка";
+        this.error_message = error.response?.data?.detail || "Произошла ошибка";
       })
       .finally(() => {
-        this.loading = false;
+        this.scaleLoading = false;
       });
     }
 	}
@@ -174,26 +334,55 @@ export default {
 </script>
 
 <style scoped>
-.btn-outline-primary {
-  color: var(--primary-blue);
+.custom-dropdown {
+  appearance: none;
+  border: 2px solid var(--border-blue);
+  border-radius: 8px;
+  padding: 0.75rem 2.5rem 0.75rem 1rem;
+  color: var(--dark-blue);
+  font-weight: 500;
+  transition: all 0.3s ease;
+  width: 100%;
+  height: 48px;
+}
+
+.custom-dropdown:focus {
   border-color: var(--primary-blue);
+  box-shadow: 0 0 0 0.25rem rgba(77, 166, 255, 0.25);
+  outline: none;
 }
 
-.btn-outline-primary:hover {
-  background-color: var(--primary-blue);
-  color: white;
+.custom-dropdown:disabled {
+  background-color: #f8f9fa;
+  color: #6c757d;
+  cursor: not-allowed;
 }
 
-.btn-primary {
-  background-color: var(--primary-blue);
-  border-color: var(--primary-blue);
-  transition: all 0.3s;
+.dropdown-wrapper {
+  position: relative;
 }
 
-.btn-primary:hover {
-  background-color: var(--dark-blue);
-  border-color: var(--dark-blue);
-  transform: translateY(-2px);
+.dropdown-loader {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 2;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.form-label {
+  flex-shrink: 0;
+}
+
+.dropdown-wrapper {
+  flex-grow: 1;
+  min-height: 48px;
 }
 
 .scale-controls {
@@ -202,6 +391,10 @@ export default {
   margin-bottom: 2rem;
   align-items: center;
   flex-wrap: wrap;
+  padding: 1.5rem;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
 }
 
 .root-note-selector, .preference-toggle {
@@ -214,12 +407,14 @@ export default {
   font-weight: bold;
   color: var(--dark-blue);
   min-width: 80px;
+  margin-bottom: 0;
 }
 
 .note-buttons {
   display: flex;
   flex-wrap: wrap;
   gap: 0.3rem;
+  max-width: 400px;
 }
 
 .note-button {
@@ -231,6 +426,7 @@ export default {
   transition: all 0.2s ease;
   font-weight: bold;
   min-width: 45px;
+  font-size: 1rem;
 }
 
 .note-button:hover {
@@ -246,12 +442,11 @@ export default {
 }
 
 .flat-note {
-  font-style: italic;
-  color: #666;
+  position: relative;
 }
 
 .sharp-note {
-  font-weight: 800;
+  position: relative;
 }
 
 .toggle-switch {
@@ -269,6 +464,7 @@ export default {
   cursor: pointer;
   transition: all 0.3s ease;
   font-weight: bold;
+  min-width: 100px;
 }
 
 .toggle-option:hover {
@@ -280,9 +476,16 @@ export default {
   color: white;
 }
 
+.apply-btn {
+  padding: 0.6rem 1.5rem;
+  font-weight: bold;
+  min-width: 120px;
+}
+
 .fretboard-container {
   padding: 20px;
   overflow-x: auto;
+  min-height: 300px;
 }
 
 .fretboard {
@@ -300,13 +503,13 @@ export default {
   display: flex;
   align-items: center;
   position: relative;
-  height: 40px;
+  height: 50px;
 }
 
 .string-row::after {
   content: '';
   position: absolute;
-  left: 60px;
+  left: 80px;
   right: 0;
   height: var(--string-thickness, 2px);
   background: linear-gradient(to right, #ddd, #fff, #ddd);
@@ -318,12 +521,27 @@ export default {
 }
 
 .open-note {
-  width: 50px;
+  width: 70px;
   display: flex;
   justify-content: center;
   align-items: center;
   z-index: 2;
   color: #fff;
+}
+
+.open-note .fret-note {
+  width: 40px;
+  height: 40px;
+  position: relative;
+}
+
+.scale-indicator {
+  position: absolute;
+  bottom: 2px;
+  right: 2px;
+  font-size: 12px;
+  color: #ffeb3b;
+  font-weight: bold;
 }
 
 .nut {
@@ -352,37 +570,57 @@ export default {
 }
 
 .fret-note {
-  width: 36px;
-  height: 36px;
+  width: 38px;
+  height: 38px;
   border-radius: 50%;
   display: flex;
   justify-content: center;
   align-items: center;
-  background-color: var(--dark-blue);
   color: white;
   font-weight: bold;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
   transition: all 0.2s ease;
   cursor: pointer;
   z-index: 2;
+  position: relative;
 }
 
-.fret-note:hover {
+.scale-note {
+  background-color: var(--dark-blue);
+}
+
+.scale-note:hover {
   background-color: var(--primary-blue);
   transform: scale(1.1);
 }
 
-.fret-missing-note {
+.non-scale-note {
   opacity: 0.7;
   background-color: #6693c0 !important;
   filter: grayscale(0.2);
 }
 
-.fret-missing-note:hover {
+.non-scale-note:hover {
   opacity: 0.8;
   background-color: #7f8c8d !important;
   filter: grayscale(0.5);
   transform: scale(1.05);
+}
+
+.root-indicator {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  background: #ff4757;
+  color: white;
+  border-radius: 50%;
+  width: 18px;
+  height: 18px;
+  font-size: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
 }
 
 .note-label {
@@ -406,8 +644,8 @@ export default {
 }
 
 .fret-marker:first-child {
-  width: 58px; /* Open note + nut width */
-  min-width: 58px;
+  width: 78px;
+  min-width: 78px;
   flex: none;
 }
 
@@ -426,13 +664,36 @@ export default {
 
 /* Responsive adjustments */
 @media (max-width: 768px) {
+  .scale-controls {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+  
+  .root-note-selector, .preference-toggle {
+    width: 100%;
+  }
+  
+  .note-buttons {
+    max-width: 100%;
+  }
+  
   .fret-cell {
     min-width: 45px;
   }
   
   .fret-note {
-    width: 30px;
-    height: 30px;
+    width: 32px;
+    height: 32px;
+  }
+  
+  .open-note {
+    width: 60px;
+  }
+  
+  .open-note .fret-note {
+    width: 35px;
+    height: 35px;
   }
   
   .note-label {
@@ -444,8 +705,16 @@ export default {
   }
   
   .fret-marker:first-child {
-    width: 53px;
-    min-width: 53px;
+    width: 68px;
+    min-width: 68px;
   }
+}
+
+.selection-container {
+  transition: opacity 0.3s ease;
+}
+
+.selection-container.loading {
+  opacity: 0.7;
 }
 </style>

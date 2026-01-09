@@ -23,30 +23,32 @@ async def create_scale(scale: Scale,
     if scale.category == DEFAULT_SCALE_NAME_CHANGE_PREVENT:
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Категория не может быть 'Default'")
 
-    scale.owner_id = str(current_user.id)
+    scale.owner_id = current_user.id
 
     scale_data = scale.model_dump(exclude={"id"})
     result = collection.insert_one(scale_data)
-    created_scale = collection.find_one({"_id": result.inserted_id})
+    created_scale = collection.find_one({"_id": ObjectId(result.inserted_id)})
     scale = Scale(**created_scale)
     return scale
 
 
 @scales_router.get("/")
-async def get_public_scales(length: int = 0, page: int = 1, query: str = "",
+async def get_public_scales(length: int = 0, 
+                            page: int = 1, 
+                            query: str = "",
                             collection: MongoClient = Depends(get_scales_collection)) -> dict[str, Union[int, list[Scale]]]:
     if length is not None and length < 0:
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Длина должна быть больше нуля или ноль")
     if page is not None and page < 1:
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Номер страницы должен быть больше нуля")
 
-    scales_amount = collection.count_documents({"public": True, "name": { "$regex": query }})
+    scales_amount = collection.count_documents({"public": True, "name": {"$regex": query}})
     if length == 0:
         pages_count = scales_amount
     else:
         pages_count = math.ceil(scales_amount / length)
 
-    public_scales_cursor = collection.find({"public": True, "name": { "$regex": query }}).sort("name").skip(length * (page - 1)).limit(length)
+    public_scales_cursor = collection.find({"public": True, "name": {"$regex": query}}).sort("name").skip(length * (page - 1)).limit(length)
     scales_list = public_scales_cursor.to_list()
     return {
         "pages": pages_count,
@@ -61,7 +63,7 @@ async def get_scale_by_id(scale_id: str,
     try:
         scale = collection.find_one({"_id": ObjectId(scale_id)})
     except InvalidId: 
-        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Неверный id")
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Неверный ID")
 
     if not scale:
         raise HTTPException(status_code=status.HTTP_204_NO_CONTENT, detail="Гамма не найдена")
@@ -87,10 +89,10 @@ async def delete_scale_by_id(scale_id: str,
     try:
         scale = collection.find_one({"_id": ObjectId(scale_id)})
     except InvalidId:
-        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Неверный id")
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Неверный ID")
 
     if not scale:
-        return
+        return HTTPException(status_code=status.HTTP_200_OK)
 
     found_scale = Scale(**scale)
     user_id = current_user.id
@@ -110,7 +112,7 @@ async def edit_scale_by_id(scale_id: str,
     try:
         current_scale_objectId = ObjectId(scale_id)
     except InvalidId:
-        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Неверный id")
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Неверный ID")
 
     scale = collection.find_one({"_id": current_scale_objectId})
 
@@ -126,19 +128,30 @@ async def edit_scale_by_id(scale_id: str,
 
 
 @scales_router.get("/{scale_id}/notes")
-async def get_scale_notes_by_id(scale_id: str, root: str = "C", prefer_flats: bool = False,
-                          collection=Depends(get_scales_collection)) -> list[str]:
+async def get_scale_notes_by_id(scale_id: str,
+                                current_user: Annotated[User, Depends(get_optional_active_user)],
+                                root: str = "C",
+                                prefer_flats: bool = False,
+                                collection=Depends(get_scales_collection)) -> list[str]:
     try:
         scale = collection.find_one({"_id": ObjectId(scale_id)})
     except InvalidId:
-        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Неверный id")
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Неверный ID")
 
     if not scale:
         raise HTTPException(status_code=status.HTTP_204_NO_CONTENT)
 
     found_scale = Scale(**scale)
 
+    if not found_scale.public and current_user is None:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Приватная гамма не может быть просмотрена без входа в аккаунт")
+
+    if not found_scale.public and found_scale.owner_id != current_user.id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Приватная гамма не может быть просмотрена текущим пользователем")
+
     try:
-        return get_scale_notes(root=root, scale=found_scale, prefer_flats=prefer_flats)
-    except ValueError:
-        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=f"Не найдена нота {root}")
+        result = get_scale_notes(root=root, scale=found_scale, prefer_flats=prefer_flats)
+    except ValueError as e:
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(e))
+    
+    return result

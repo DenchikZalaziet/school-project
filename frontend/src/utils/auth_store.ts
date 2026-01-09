@@ -40,6 +40,7 @@ export const useAuthStore = defineStore('auth', {
         };
         console.error(error);
         this.token = null;
+        this.user = null;
        })
       .finally(() => {
         setAxiosToken(this.token);

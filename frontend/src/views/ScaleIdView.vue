@@ -227,7 +227,7 @@ export default {
 				};
 
 				let scale = response.data;
-				if (useAuthStore().user && response.data["owner_id"] == useAuthStore().user._id) {
+				if (useAuthStore().isAuthenticated && useAuthStore().user && response.data["owner_id"] == useAuthStore().user._id) {
 						this.is_my_scale = true;
 				};
 

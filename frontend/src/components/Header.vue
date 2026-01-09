@@ -2,17 +2,17 @@
   <header class="p-2 border-bottom app-header">
     <div class="container">
       <div class="d-flex flex-wrap align-items-center justify-content-center justify-content-lg-start">
-        <router-link :to="`/profile/me`" class="logo-container d-flex lign-items-center">
+        <router-link :to="{path: '/profile/me/', query: {page: 1, q: ''}}" class="logo-container d-flex lign-items-center">
           <img src="../assets/logo.png" class="logo"  alt="Лого" width="70" height="70">
         </router-link>
 
         <ul class="nav col-12 col-lg-auto me-lg-auto mb-2 justify-content-center mb-md-0">
           <router-link :to="`/`" class="header-link"><a class="nav-link px-2 text-secondary">Главная</a></router-link>
-          <router-link :to="`/scales`" class="header-link"><a class="nav-link px-2 text-secondary">Гаммы</a></router-link>
+          <router-link :to="{path: '/scales/', query: {page: 1, q: ''}}" class="header-link"><a class="nav-link px-2 text-secondary">Гаммы</a></router-link>
         </ul>
 
         <div class="text-end" v-if="authStore.isAuthenticated">
-          <router-link :to="`/profile/me`" class="header-link">
+          <router-link :to="{path: '/profile/me/', query: {page: 1, q: ''}}" class="header-link">
             <a href="#" class="btn btn-outline-primary rounded-pill px-4 mx-2 shadow-sm">
               <i class="bi bi-person me-2"></i> {{ authStore.username }}
             </a>

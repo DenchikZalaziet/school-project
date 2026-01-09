@@ -5,7 +5,7 @@
       <h1 class="page-title">Публичные гаммы</h1>
       <div class="controls d-flex align-items-center">
         <div class="search-box">
-          <input type="text" class="form-control" placeholder="Искать по названию..." v-model="searchQuery">
+          <input type="text" class="form-control" placeholder="Искать по названию..." v-model="searchQuery" @input="updateSearchURL" @keyup.enter="updateSearchURL">
         </div>
       </div>
     </div>
@@ -57,50 +57,68 @@ export default {
   name: 'Public Scales',
   data() {
     return {
-        selectedCategory: "all",
-        searchQuery: "",
-        currentPage: 1,
-        totalPages: 1,
-        paginatedScales: [],
-
-        loading: false
+      searchQuery: this.$route.query.q || "",
+      currentPage: parseInt(this.$route.query.page) || 1,
+      totalPages: 1,
+      paginatedScales: [],
+      loading: false,
+      debounceTimer: null 
     }
   },
   methods: {
     changePage(page) {
       if (page <= this.totalPages && page > 0) {
-        this.currentPage = page;
-        this.loadScalesPage();
-      };
+        this.$router.push({
+          query: { 
+            ...this.$route.query,
+            page: page 
+          }
+        });
+      }
     },
+    
+    updateSearchURL() {
+      clearTimeout(this.debounceTimer);
+      this.debounceTimer = setTimeout(() => {
+        this.$router.push({
+          query: { 
+            ...this.$route.query,
+            q: this.searchQuery || undefined,
+            page: 1
+          }
+        });
+      }, 300);
+    },
+    
     async loadScalesPage() {
-      this.loading = true
-      await api.get('/scale', {
-        params: {
-          length: pageLength,
-          page: this.currentPage,
-          query: this.searchQuery
-        }
-      })
-      .then (response => {
-        this.totalPages = response.data["pages"];
-        this.paginatedScales = response.data["scales"];
-      })
-      .catch (error => {
+      this.loading = true;
+      try {
+        const response = await api.get('/scale', {
+          params: {
+            length: pageLength,
+            page: this.currentPage,
+            query: this.searchQuery
+          }
+        });
+        this.totalPages = response.data.pages;
+        this.paginatedScales = response.data.scales;
+      } catch (error) {
         console.error(error);
-      })
-      .finally(() => {
+      } finally {
         this.loading = false;
-      });
+      }
     }
   },
+  
   watch: {
-    searchQuery() {
-      this.loadScalesPage();
+    '$route.query': {
+      handler(newQuery) {
+        this.searchQuery = newQuery.q || "";
+        this.currentPage = parseInt(newQuery.page) || 1;
+        this.loadScalesPage();
+      },
+      immediate: true
     }
-  },
-  created() {
-    this.loadScalesPage();
   }
 }
 </script>
