@@ -32,7 +32,6 @@
             class="form-control input-field border-2 border-primary rounded-3 py-3 px-4" 
             id="descriptionInput" 
             v-model="current_description"
-            maxlength="100"
             @change="user_info_changed = true"
             placeholder="Описание"
             style="
@@ -42,7 +41,7 @@
           </textarea>
         </div>
         <div class="text-center">
-          <p v-if="error_message" class="error-box">{{ error_message }}</p>
+          <p v-if="true" class="error-box">{{ error_message }}</p>
           <button type="submit" 
             class="submit-btn btn btn-outline-primary mx-2" 
             :disabled="!isFormValid">
@@ -92,7 +91,7 @@ export default {
       formData.append("username", this.current_username);
       formData.append("description", this.current_description);
 
-      await api.patch('/user/me', 
+      api.patch('/user/me', 
         formData, {
         headers: { 
             'Content-Type': 'multipart/form-data'
@@ -104,7 +103,7 @@ export default {
         this.user_info_changed = false;
       })
       .catch (error => {
-        this.error_message = error.response?.data?.detail | "Произошла ошибка";
+        this.error_message = error.response?.data?.detail ?? "Произошла ошибка";
         console.error(error);
       })
       .finally(() => {

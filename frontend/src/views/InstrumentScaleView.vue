@@ -245,7 +245,7 @@ export default {
       })
       .catch(error => {
         console.error(error);
-        this.error_message = error.response?.data?.detail || "Произошла ошибка";
+        this.error_message = error.response?.data?.detail ?? "Произошла ошибка";
       })
       .finally(() => {
         this.loading = false;
@@ -260,7 +260,7 @@ export default {
       if (this.current_instrument) {
         this.string_count = this.current_instrument.number_of_strings;
         this.fretboard_length = this.current_instrument.fretboard_length;
-        await this.getInstrumentTunings();
+        this.getInstrumentTunings();
       }
     },
 
@@ -280,7 +280,7 @@ export default {
       })
       .catch(error => {
         console.error(error);
-        this.error_message = error.response?.data?.detail || "Произошла ошибка";
+        this.error_message = error.response?.data?.detail ?? "Произошла ошибка";
       })
       .finally(() => {
         this.loading = false;
@@ -300,7 +300,7 @@ export default {
       })
       .catch(error => {
         console.error(error);
-        this.error_message = error.response?.data?.detail || "Произошла ошибка";
+        this.error_message = error.response?.data?.detail ?? "Произошла ошибка";
       })
       .finally(() => {
         this.loading = false;
@@ -323,7 +323,7 @@ export default {
       })
       .catch(error => {
         console.error(error);
-        this.error_message = error.response?.data?.detail || "Произошла ошибка";
+        this.error_message = error.response?.data?.detail ?? "Произошла ошибка";
       })
       .finally(() => {
         this.scaleLoading = false;

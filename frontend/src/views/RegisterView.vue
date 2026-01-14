@@ -12,7 +12,6 @@
             type="text" 
             class="form-control input-field"
             id="username"
-            maxlength="20"
             v-model="username"
             required
           >
@@ -72,7 +71,7 @@ export default {
   methods: {
     async handleRegister() {
       this.loading = true;
-      await useAuthStore().register(this.username.trim(), this.password);
+      useAuthStore().register(this.username.trim(), this.password);
       this.error_message = useAuthStore().error_message;
       this.loading = false;
     },

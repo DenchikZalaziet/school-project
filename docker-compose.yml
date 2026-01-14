@@ -1,0 +1,53 @@
+services:
+  # Database
+  mongodb:
+    image: mongo:latest
+    container_name: db
+    restart: always
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=${MONGO_USER}
+      - MONGO_INITDB_ROOT_PASSWORD=${MONGO_PASSWORD}
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 20s
+      timeout: 10s
+      start_period: 10s
+      retries: 3
+
+  # Backend
+  backend:
+    build: 
+      context: .
+      dockerfile: backend/Dockerfile
+    container_name: backend
+    env_file:
+      - backend/.env
+    environment:
+      - MONGO_URI=mongodb://mongodb:27017/
+      - PYTHONPATH=/app
+    ports:
+      - "8000:8000"
+    depends_on:
+      mongodb:
+        condition: service_healthy
+
+  # Frontend
+  frontend:
+    build: ./frontend
+    container_name: frontend
+    environment:
+      - NODE_ENV=development
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules 
+    depends_on:
+      - backend
+
+volumes:
+  mongo-data: 

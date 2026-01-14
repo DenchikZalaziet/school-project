@@ -27,7 +27,7 @@
         </div>
       </div>
       
-      <div v-if="paginatedScales.length === 0" class="empty-state text-center py-5">
+      <div v-if="paginatedScales == undefined || paginatedScales.length === 0" class="empty-state text-center py-5">
         <h4>Ничего не найдено!</h4>
       </div>
     </div>
@@ -57,8 +57,8 @@ export default {
   name: 'Public Scales',
   data() {
     return {
-      searchQuery: this.$route.query.q || "",
-      currentPage: parseInt(this.$route.query.page) || 1,
+      searchQuery: this.$route.query.q ?? "",
+      currentPage: parseInt(this.$route.query.page) ?? 1,
       totalPages: 1,
       paginatedScales: [],
       loading: false,
@@ -83,7 +83,7 @@ export default {
         this.$router.push({
           query: { 
             ...this.$route.query,
-            q: this.searchQuery || undefined,
+            q: this.searchQuery ?? undefined,
             page: 1
           }
         });
@@ -92,29 +92,31 @@ export default {
     
     async loadScalesPage() {
       this.loading = true;
-      try {
-        const response = await api.get('/scale', {
-          params: {
-            length: pageLength,
-            page: this.currentPage,
-            query: this.searchQuery
-          }
-        });
+      api.get('/scale', {
+        params: {
+          length: pageLength,
+          page: this.currentPage,
+          query: this.searchQuery
+        }
+      })
+      .then(response => {
         this.totalPages = response.data.pages;
         this.paginatedScales = response.data.scales;
-      } catch (error) {
+      })
+      .catch(error => {
         console.error(error);
-      } finally {
+      })
+      .finally(() => {
         this.loading = false;
-      }
+      });
     }
   },
   
   watch: {
     '$route.query': {
       handler(newQuery) {
-        this.searchQuery = newQuery.q || "";
-        this.currentPage = parseInt(newQuery.page) || 1;
+        this.searchQuery = newQuery.q ?? "";
+        this.currentPage = parseInt(newQuery.page) ?? 1;
         this.loadScalesPage();
       },
       immediate: true

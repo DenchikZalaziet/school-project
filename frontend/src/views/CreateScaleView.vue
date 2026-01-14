@@ -21,7 +21,6 @@
                   class="form-control form-control-lg custom-input scale-name" 
                   id="scaleName" 
                   v-model="current_name"
-                  maxlength="20"
                   placeholder="Введите название гаммы"
                   required
                 >
@@ -33,7 +32,6 @@
                   class="form-control custom-input" 
                   id="scaleCategory" 
                   v-model="current_category"
-                  maxlength="20"
                   placeholder="Введите категорию гаммы"
                   required
                 >
@@ -45,7 +43,6 @@
                   id="scaleDescription" 
                   rows="3"
                   v-model="current_description"
-                  maxlength="100"
                   placeholder="Опишите особенности этой гаммы"
                 ></textarea>
               </div>
@@ -82,12 +79,10 @@
                   </button>
 
                   <div class="d-flex gap-2 justify-content-end mt-4">
-                    <router-link :to="`/profile/me`" class="header-link">
                       <button type="submit" class="btn btn-success form-btn mx-4 px-4" :disabled="!isFormValid">
                         <span v-if="loading" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
                         {{ loading ? 'Создание...' : 'Создать гамму' }}
                       </button>
-                    </router-link>
                     <button type="button" class="btn btn-outline-secondary form-btn" @click="resetForm">
                       Сбросить
                     </button>
@@ -119,14 +114,14 @@ export default {
 
       current_name: '',
       current_description: '',
-      current_category: '',
+      current_category: 'Приватная',
       current_intervals: [1]
     }
   },
   computed: {
     isFormValid() {
       return !this.loading 
-      && this.current_name.trim() 
+      && this.current_name.trim()
       && this.current_category.trim() 
       && this.current_intervals != [];
     }
@@ -161,19 +156,18 @@ export default {
       this.current_category = '';
       this.current_intervals = [1];
       this.error_message = '';
-      this.success_message = '';
     },
     async submitScale() {
       const data = {
-        name: this.current_name.trim(),
-        description: this.current_description.trim(),
-        category: this.current_category.trim(),
+        name: this.current_name ? this.current_name.trim() : 'default_name',
+        description: this.current_description ? this.current_description.trim() : '',
+        category: this.current_category ? this.current_category.trim() : '',
         intervals: this.current_intervals
       };
       
       this.loading = true;
       
-      await api.post('scale', data, {
+      api.post('scale', data, {
         headers: { 
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${useAuthStore().token}`
@@ -185,10 +179,11 @@ export default {
       })
       .catch (error => {
         console.error(error);
-        this.error_message = error.response?.data?.detail || "Произошла ошибка";
+        this.error_message = error.response?.data?.detail ?? "Произошла ошибка";
       })
       .finally (() => {
         this.loading = false;
+        window.scrollTo(0, 0);
       });
     }
   }

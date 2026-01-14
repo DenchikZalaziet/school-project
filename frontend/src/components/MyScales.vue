@@ -4,7 +4,7 @@
       <h1 class="page-title">Мои гаммы</h1>
       <div class="controls d-flex align-items-center">
         <div class="search-box d-flex align-items-center">
-          <input type="text" class="form-control" placeholder="Искать по названию..." v-model="searchQuery">
+          <input type="text" class="form-control" placeholder="Искать по названию..." v-model="searchQuery" @input="updateSearchURL" @keyup.enter="updateSearchURL">
           <button type="button" class="btn btn-primary ms-4 px-2 w-75" @click="$router.push('/scales/create')">Создать гамму</button>
         </div>
       </div>
@@ -27,7 +27,7 @@
         </div>
       </div>
       
-      <div v-if="paginatedScales.length === 0" class="empty-state text-center py-5">
+      <div v-if="paginatedScales == undefined ?? paginatedScales.length === 0" class="empty-state text-center py-5">
         <h4>Ничего не найдено!</h4>
       </div>
     </div>
@@ -61,7 +61,7 @@ export default {
   methods: {
     async loadScalesPage() {
       this.loading = true;
-      await api.get('/user/me/scale', {
+      api.get('/user/me/scale', {
         params: {
           length: pageLength,
           page: this.currentPage,
@@ -71,11 +71,11 @@ export default {
           'Authorization': `Bearer ${useAuthStore().token}`
         }
       })
-      .then (response => {
-        this.totalPages = response.data["pages"];
-        this.paginatedScales = response.data["scales"];
+      .then(response => {
+        this.totalPages = response.data.pages;
+        this.paginatedScales = response.data.scales;
       })
-      .catch (error => {
+      .catch(error => {
         console.error(error);
       })
       .finally(() => {

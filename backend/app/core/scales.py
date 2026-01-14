@@ -21,7 +21,7 @@ async def create_scale(scale: Scale,
                        current_user: Annotated[User, Depends(get_current_active_user)],
                        collection: MongoClient = Depends(get_scales_collection)) -> Scale:
     if scale.category == DEFAULT_SCALE_NAME_CHANGE_PREVENT:
-        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Категория не может быть 'Default'")
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=f"Категория не может быть {DEFAULT_SCALE_NAME_CHANGE_PREVENT}")
 
     scale.owner_id = current_user.id
 
@@ -117,7 +117,7 @@ async def edit_scale_by_id(scale_id: str,
     scale = collection.find_one({"_id": current_scale_objectId})
 
     if scale["category"] == DEFAULT_SCALE_NAME_CHANGE_PREVENT or data.category == DEFAULT_SCALE_NAME_CHANGE_PREVENT:
-        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Категория не может быть 'Default'")
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=f"Категория не может быть {DEFAULT_SCALE_NAME_CHANGE_PREVENT}")
 
     if scale and scale["owner_id"] != current_user.id:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Гамма не может быть изменена текущим пользователем")

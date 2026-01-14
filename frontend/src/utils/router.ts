@@ -1,15 +1,16 @@
-import { createRouter, createWebHistory, RouteRecordRaw } from 'vue-router';
+import { createRouter, createWebHistory} from 'vue-router';
+import type { RouteRecordRaw } from 'vue-router';
 
-import { useAuthStore } from './auth_store';
-import HomeView from '@/views/HomeView.vue'
-import LoginView from '@/views/LoginView.vue'
-import RegisterView from '@/views/RegisterView.vue';
-import ScalesView from '@/views/ScalesView.vue';
-import UserMeView from '@/views/UserMeView.vue';
-import ScaleIdView from '@/views/ScaleIdView.vue';
-import CreateScaleView from '@/views/CreateScaleView.vue';
-import NotFound404View from '@/views/NotFound404View.vue';
-import InstrumentScaleView from '@/views/InstrumentScaleView.vue';
+import { useAuthStore } from './auth_store.js';
+import HomeView from '/src/views/HomeView.vue';
+import LoginView from '/src/views/LoginView.vue'
+import RegisterView from '/src/views/RegisterView.vue';
+import ScalesView from '/src/views/ScalesView.vue';
+import UserMeView from '/src/views/UserMeView.vue';
+import ScaleIdView from '/src/views/ScaleIdView.vue';
+import CreateScaleView from '/src/views/CreateScaleView.vue';
+import NotFound404View from '/src/views/NotFound404View.vue';
+import InstrumentScaleView from '/src/views/InstrumentScaleView.vue';
 
 
 

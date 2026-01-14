@@ -22,6 +22,12 @@ def test_user_flow(client):
     })
     assert response.status_code == 204
 
+    response = client.patch("/user/me", headers={"Authorization": f"Bearer {token}"}, data={
+        "username": "long_desc",
+        "description": f"{'a' * 5000}"
+    })
+    assert response.status_code == 422
+
     response = client.get("/user/me", headers={"Authorization": f"Bearer {token}"})
     assert response.status_code == 200
     assert response.json()["username"] == "edited_user"

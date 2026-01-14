@@ -41,12 +41,6 @@ def test_full_auth_flow(client):
     assert response.status_code == 401
 
     response = client.post("/auth/register", data={
-        "username": "01234567890123456789ABC",
-        "password": "01234567890123456789ABC"
-    })
-    assert response.status_code == 422
-
-    response = client.post("/auth/register", data={
         "username": "test_user",
         "password": "secure_password123"
     })

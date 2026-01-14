@@ -1,8 +1,9 @@
 import { defineStore } from 'pinia';
-import api from '@/utils/axios';
-import router from '@/utils/router';
+import api from '@/utils/axios.js';
+import router from '@/utils/router.js';
+import type axios from 'axios';
 
-const setAxiosToken = (token: string) => {
+const setAxiosToken = (token: string | null) => {
   if (token) {
     api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
   } else {
@@ -13,8 +14,8 @@ const setAxiosToken = (token: string) => {
 
 export const useAuthStore = defineStore('auth', {
   state: () => ({
-    user: JSON.parse(localStorage.getItem('user')) || null,
-    token: localStorage.getItem('token') || null,
+    user: JSON.parse(localStorage.getItem('user') ?? ""),
+    token: localStorage.getItem('token') ?? null,
     loading: false,
     error_message: '',
   }),
@@ -23,7 +24,7 @@ export const useAuthStore = defineStore('auth', {
       this.loading = true;
       this.error_message = '';
 
-      await api.get('/user/me', {
+      api.get('/user/me', {
         headers: { 
           'Content-Type': 'application/x-www-form-urlencoded', 
           'Authorization': `Bearer ${this.token}`
@@ -55,12 +56,12 @@ export const useAuthStore = defineStore('auth', {
       params.append('username', username);
       params.append('password', password);
 
-      await api.post('/auth/login', params, {
+      api.post('/auth/login', params, {
         headers: { 'Content-Type': 'application/x-www-form-urlencoded'}
       })
       .then(response => {
         this.token = response.data.access_token;
-        localStorage.setItem('token', this.token);
+        localStorage.setItem('token', this.token? this.token : "");
         setAxiosToken(this.token);
         this.fetchUser();
         router.push('/');
@@ -85,14 +86,14 @@ export const useAuthStore = defineStore('auth', {
       params.append('username', username);
       params.append('password', password);
 
-      await api.post('/auth/register', params, {
+      api.post('/auth/register', params, {
         headers: { 
           'Content-Type': 'application/x-www-form-urlencoded' 
         }
       })
       .then(response => {
         this.token = response.data.access_token;
-        localStorage.setItem('token', this.token);
+        localStorage.setItem('token', this.token? this.token : "");
         setAxiosToken(this.token);
         this.fetchUser();
         router.push('/');
@@ -127,7 +128,7 @@ export const useAuthStore = defineStore('auth', {
       this.loading = true;
       this.error_message = '';
 
-      await api.get('/user/me', {
+      api.get('/user/me', {
         headers: { 
           'Content-Type': 'application/x-www-form-urlencoded',
           'Authorization': `Bearer ${this.token}`

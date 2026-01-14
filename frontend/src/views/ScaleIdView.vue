@@ -15,7 +15,6 @@
               id="scaleName" 
               @change="scale_info_changed = true"
               v-model="current_name"
-              maxlength="20"
               placeholder="Имя"
               :disabled="!is_my_scale"
             >
@@ -35,7 +34,6 @@
               rows="3"
               @change="scale_info_changed = true"
               v-model="current_description"
-              maxlength="100"
               placeholder="Описание"
               :disabled="!is_my_scale"
             >
@@ -209,7 +207,7 @@ export default {
     },
     async getScale() {
 			this.loading = true;
-			await api.get(`/scale/${this.scale_id}`, { 
+			api.get(`/scale/${this.scale_id}`, { 
 				headers: { 
 					'Content-Type': 'application/x-www-form-urlencoded',
 					'Authorization': `Bearer ${useAuthStore().token}`
@@ -261,7 +259,7 @@ export default {
         category: this.current_category.trim(),
         intervals: this.current_intervals
       };
-      await api.patch(`/scale/${this.scale_id}`, 
+      api.patch(`/scale/${this.scale_id}`, 
         data, {
         headers: { 
           'Content-Type': 'application/json',
@@ -287,7 +285,7 @@ export default {
     },
     async deleteScale() {
 			this.loading = true;
-      await api.delete(`/scale/${this.scale_id}`)
+      api.delete(`/scale/${this.scale_id}`)
       .then (response => {
         this.error_message = '';
         this.scale_info_changed = false;

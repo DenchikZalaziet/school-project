@@ -10,7 +10,6 @@ from backend.app.schemas.scales_schemas import Scale
 from backend.app.utils.auth_utils import get_current_active_user
 from backend.app.utils.db_utils import get_users_collection, get_scales_collection
 from backend.app.schemas.user_schemas import User, UserEditForm
-
 user_router = APIRouter(prefix="/user")
 
 
@@ -46,7 +45,9 @@ async def delete_user_me(current_user: Annotated[User, Depends(get_current_activ
 
 @user_router.get("/me/scale")
 async def get_my_scales(current_user: Annotated[User, Depends(get_current_active_user)],
-                        length: int = 0, page : int = 1, query: str = "",
+                        length: int = 0, 
+                        page : int = 1, 
+                        query: str = "",
                         collection=Depends(get_scales_collection)) -> dict[str, Union[int, list[Scale]]]:
     if length is not None and length < 0:
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Длина должна быть больше нуля или ноль")
