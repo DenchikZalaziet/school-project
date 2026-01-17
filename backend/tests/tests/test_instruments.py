@@ -46,9 +46,9 @@ def test_get_instrument_notes():
     instrument, tuning = create_new_instrument_and_tuning(number_of_strings=3, fretboard_length=5, tuning=['A', 'B', 'C'])
 
     notes = get_instrument_notes(instrument, tuning, prefer_flats=True)
-    assert notes == [['A', 'B♭', 'B', 'C', 'D♭', 'D'],
+    assert notes == [['C', 'D♭', 'D', 'E♭', 'E', 'F'],
                      ['B', 'C', 'D♭', 'D', 'E♭', 'E'],
-                     ['C', 'D♭', 'D', 'E♭', 'E', 'F']]
+                     ['A', 'B♭', 'B', 'C', 'D♭', 'D']]
 
     with pytest.raises(ValueError):
         Instrument(fretboard_length=-1, number_of_strings=1)
@@ -74,7 +74,7 @@ def test_get_instrument_notes_in_a_scale():
                      ['E', '-', '-', 'G', '-', 'A', '-', '-', 'C', '-', 'D', '-', 'E', '-', '-', 'G', '-', 'A', '-', '-', 'C', '-', 'D']
                      ]
 
-    instrument, tuning = create_new_instrument_and_tuning(3, 5, tuning=["A", "B", "G"])
+    instrument, tuning = create_new_instrument_and_tuning(3, 5, tuning=["G", "B", "A"])
 
     notes = get_instrument_notes_in_a_scale(instrument, tuning, standard_scale, "E♯")
     assert notes == [['-', 'A♯', '-', 'C', '-', '-'],

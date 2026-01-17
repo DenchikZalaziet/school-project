@@ -125,9 +125,9 @@
 
 <script setup>
 import Header from '@/components/Header.vue';
-
-import api from '@/utils/axios';
+import { api } from '@/utils/axios';
 import { useAuthStore } from '@/utils/auth_store';
+import { env } from '@/utils/env.js';
 </script>
 
 <script>
@@ -218,7 +218,9 @@ export default {
 				this.no_content_message = '';
 
 				if (response.status == 204) {
-					console.log(response.data);
+          if (env.DEBUG) { 
+            console.log(response.data); 
+          };
 					this.no_content = true;
 					this.no_content_message = 'Ничего не найдено!';
 					return;
@@ -240,7 +242,9 @@ export default {
         this.current_intervals = [...this.saved_intervals];
 			})
 			.catch(error => {
-				console.error(error);
+				if (env.DEBUG) {
+          console.error(error);
+        };
 				this.error_message = error.response?.data?.detail | "Произошла ошибка";
 				if (error.response?.status == 403) {
 						this.no_content = true;
@@ -277,7 +281,9 @@ export default {
       })
       .catch (error => {
         this.error_message = error.response?.data?.detail | "Произошла ошибка";
-        console.error(error);
+        if (env.DEBUG) {
+          console.error(error);
+        };
       })
 			.finally(() => {
 				this.loading = false;
@@ -292,7 +298,9 @@ export default {
       })
       .catch (error => {
         this.error_message = error.response?.data?.detail | "Произошла ошибка";
-        console.error(error);
+        if (env.DEBUG) {
+          console.error(error);
+        };
       })
 			.finally(() => {
 				this.loading = false;

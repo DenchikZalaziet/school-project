@@ -60,5 +60,5 @@ class TestingStash:
     GuitarStandardTuning = Tuning(_id=ObjectId(),
                                   name="Standard Tuning",
                                   description="Standard 6 string guitar tuning",
-                                  notes=["E", "B", "G", "D", "A", "E"],
+                                  notes=["E", "A", "D", "G", "B", "E"],
                                   instrument_id=str(Guitar6String.id))

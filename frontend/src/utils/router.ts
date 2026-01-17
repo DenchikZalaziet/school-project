@@ -34,7 +34,7 @@ const routes: Array<RouteRecordRaw> = [
     path: '/profile/me/',
     name: 'My Profile',
     component: UserMeView,
-    meta: { requiresAuth: true }
+    meta: { requiresAuth: true, needsFetch: true }
   },
   {
     path: '/scales/',
@@ -45,12 +45,13 @@ const routes: Array<RouteRecordRaw> = [
     path: '/scales/:scale_id',
     name: 'Scale By ID',
     component: ScaleIdView,
+    meta: { needsFetch: true }
   },
   {
     path: '/scales/create',
     name: 'Create Scale',
     component: CreateScaleView,
-    meta: { requiresAuth: true }
+    meta: { requiresAuth: true, needsFetch: true }
   },
   {
     path: '/instrument/:instrument/:tuning/:scale_id',
@@ -71,11 +72,15 @@ const router = createRouter({
   routes
 });
 
-router.beforeEach((to, from, next) => {
-  useAuthStore().fetchUser();
+router.beforeEach(async (to, from, next) => {
+  if (to.meta.needsFetch) {
+    await useAuthStore().fetchUser();
+  }
+
+  useAuthStore().error_message = '';
+
   if (to.meta.requiresAuth) {
     const isLoggedIn = useAuthStore().isAuthenticated;
-    
     if (isLoggedIn) {
       next();
     } else {

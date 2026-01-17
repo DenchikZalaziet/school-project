@@ -36,7 +36,7 @@
         </button>
       </form>
 
-      <p v-if="error_message" class="error-box">{{ error_message }}</p>
+      <p v-if="authStore.error_message" class="error-box">{{ authStore.error_message }}</p>
       
       <div class="mt-3 text-center">
         <button type="button" class="btn btn-outline-primary mx-2" @click="redirectToHome">Главная</button>
@@ -48,6 +48,8 @@
 
 <script setup>
 import { useAuthStore } from '@/utils/auth_store';
+
+const authStore = useAuthStore();
 </script>
 
 <script>

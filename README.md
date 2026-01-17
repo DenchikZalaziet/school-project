@@ -1,7 +1,5 @@
 # school-project
 
-<hr>
-
 ## Backend
 ### Из корня
 - Запуск сервера с автоматическим обновлением при изменениях: <br>
@@ -17,3 +15,6 @@
 ### Из корня
 - Запуск фронтэнда <br>
 ``` npm run dev --prefix frontend ``` <br>
+
+## Docker
+- ``` docker-compose up ```

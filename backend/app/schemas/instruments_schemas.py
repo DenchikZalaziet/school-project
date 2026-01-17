@@ -9,7 +9,7 @@ class Instrument(BaseModel):
     class Config:
         arbitrary_types_allowed = True
 
-    id: Optional[str] = Field(alias='_id', default=None)
+    id: Optional[str] = Field(alias="_id", default=None)
     name: Optional[str] = None
     description: Optional[str] = None
     category: Optional[str] = None

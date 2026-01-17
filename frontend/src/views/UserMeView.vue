@@ -56,10 +56,11 @@
 </template>
 
 <script setup>
-import api from '@/utils/axios';
 import Header from '@/components/Header.vue'
 import MyScales from '@/components/MyScales.vue';
 import { useAuthStore } from '@/utils/auth_store';
+import { api } from '@/utils/axios';
+import { env } from '@/utils/env.js';
 </script>
 
 <script>
@@ -104,7 +105,9 @@ export default {
       })
       .catch (error => {
         this.error_message = error.response?.data?.detail ?? "Произошла ошибка";
-        console.error(error);
+        if (env.DEBUG) {
+          console.error(error);
+        };
       })
       .finally(() => {
         this.loading = false;

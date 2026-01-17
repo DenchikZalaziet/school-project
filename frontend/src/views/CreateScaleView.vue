@@ -99,8 +99,9 @@
 
 <script setup>
 import Header from '@/components/Header.vue';
-import api from '@/utils/axios';
+import { api } from '@/utils/axios';
 import { useAuthStore } from '@/utils/auth_store';
+import { env } from '@/utils/env.js';
 </script>
 
 <script>
@@ -178,7 +179,9 @@ export default {
         this.resetForm();
       })
       .catch (error => {
-        console.error(error);
+        if (env.DEBUG) {
+          console.error(error);
+        };
         this.error_message = error.response?.data?.detail ?? "Произошла ошибка";
       })
       .finally (() => {

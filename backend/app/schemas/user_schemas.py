@@ -9,7 +9,7 @@ class User(BaseModel):
     class Config:
         arbitrary_types_allowed = True
 
-    id: Optional[str] = Field(alias='_id', default=None)
+    id: Optional[str] = Field(alias="_id", default=None)
     username: str
     description: Optional[str] = None
     disabled: Optional[bool] = None

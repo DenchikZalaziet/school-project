@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia';
-import api from '@/utils/axios.js';
+import { env } from '@/utils/env.js';
+import { api } from '@/utils/axios.js';
 import router from '@/utils/router.js';
-import type axios from 'axios';
 
 const setAxiosToken = (token: string | null) => {
   if (token) {
@@ -11,43 +11,18 @@ const setAxiosToken = (token: string | null) => {
   }
 };
 
-
 export const useAuthStore = defineStore('auth', {
   state: () => ({
-    user: JSON.parse(localStorage.getItem('user') ?? ""),
+    user: JSON.parse(localStorage.getItem('user') as string),
     token: localStorage.getItem('token') ?? null,
     loading: false,
     error_message: '',
   }),
   actions: {
     async setup() {
-      this.loading = true;
-      this.error_message = '';
-
-      api.get('/user/me', {
-        headers: { 
-          'Content-Type': 'application/x-www-form-urlencoded', 
-          'Authorization': `Bearer ${this.token}`
-        }
-      })
-      .then(response => {
-        this.user = response.data;
-      })
-      .catch(error => {
-         if (error.response?.data?.detail) {
-          this.error_message = error.response.data.detail;
-        } else {
-          this.error_message = "Произошла ошибка";
-        };
-        console.error(error);
-        this.token = null;
-        this.user = null;
-       })
-      .finally(() => {
-        setAxiosToken(this.token);
-        this.loading = false;
-      });
+      await this.fetchUser();
     },
+
     async login(username: string, password: string) {
       this.loading = true;
       this.error_message = '';
@@ -56,7 +31,7 @@ export const useAuthStore = defineStore('auth', {
       params.append('username', username);
       params.append('password', password);
 
-      api.post('/auth/login', params, {
+      return api.post('/auth/login', params, {
         headers: { 'Content-Type': 'application/x-www-form-urlencoded'}
       })
       .then(response => {
@@ -72,12 +47,15 @@ export const useAuthStore = defineStore('auth', {
         } else {
           this.error_message = "Произошла ошибка";
         };
-        console.error(error);
+        if (env.DEBUG) {
+          console.error(error);
+        };
       })
       .finally(() => {
         this.loading = false;
       });
     },
+
     async register(username: string, password: string) {
       this.loading = true;
       this.error_message = '';
@@ -86,7 +64,7 @@ export const useAuthStore = defineStore('auth', {
       params.append('username', username);
       params.append('password', password);
 
-      api.post('/auth/register', params, {
+      return api.post('/auth/register', params, {
         headers: { 
           'Content-Type': 'application/x-www-form-urlencoded' 
         }
@@ -104,12 +82,15 @@ export const useAuthStore = defineStore('auth', {
         } else {
           this.error_message = "Произошла ошибка";
         };
-        console.error(error);
+        if (env.DEBUG) {
+          console.error(error);
+        };
       })
       .finally(() => {
         this.loading = false;
       });
     },
+
     logout() {
       this.error_message = '';
       this.token = null;
@@ -117,20 +98,22 @@ export const useAuthStore = defineStore('auth', {
       localStorage.removeItem('token');
       localStorage.removeItem('user');
     },
+
     changeToken(token: string) {
       if (token) {
         this.token = token;
       };
       setAxiosToken(token);
     },
+
     async fetchUser() {
       if (this.token == null) {return};
       this.loading = true;
       this.error_message = '';
 
-      api.get('/user/me', {
+      return api.get('/user/me', {
         headers: { 
-          'Content-Type': 'application/x-www-form-urlencoded',
+          'Content-Type': 'application/x-www-form-urlencoded', 
           'Authorization': `Bearer ${this.token}`
         }
       })
@@ -138,14 +121,19 @@ export const useAuthStore = defineStore('auth', {
         this.user = response.data;
       })
       .catch(error => {
-        if (error.response?.data?.detail) {
-            this.error_message = error.response.data.detail;
+         if (error.response?.data?.detail) {
+          this.error_message = error.response.data.detail;
         } else {
-            this.error_message = "Произошла ошибка";
+          this.error_message = "Произошла ошибка";
         };
-        console.error(error);
-      })
+        if (env.DEBUG) {
+          console.error(error);
+        };
+        this.token = null;
+        this.user = null;
+       })
       .finally(() => {
+        setAxiosToken(this.token);
         this.loading = false;
       });
     },

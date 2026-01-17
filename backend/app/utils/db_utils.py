@@ -1,21 +1,27 @@
-from fastapi import Depends
+from contextlib import asynccontextmanager
+import logging
+from fastapi import Depends, FastAPI
 from pymongo import MongoClient
 from pymongo.database import Database
 from pymongo.collection import Collection
-from pymongo.errors import ConnectionFailure, ServerSelectionTimeoutError
+from pymongo.errors import ConnectionFailure
 
 from backend.app.utils.loader import MONGO_URI, MONGO_DB_NAME
 
-client = MongoClient(MONGO_URI)
+client = MongoClient(MONGO_URI, 
+                     retryWrites=True,
+                     serverSelectionTimeoutMS=5000)
 
-def check_connection() -> bool:
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
     try:
         client.admin.command('ping')
-        print("MongoDB ping successful!")
-        return True
-    except (ConnectionFailure, ServerSelectionTimeoutError) as e:
-        print(f"MongoDB ping failed: {e}")
-        return False
+        logging.info("MongoDB connected")
+    except ConnectionFailure as e:
+        logging.warning(f"Failed to connect to database: {e}")
+    yield
+    client.close()
 
 
 def get_data_db() -> MongoClient:

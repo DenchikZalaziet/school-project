@@ -74,7 +74,7 @@ def get_instrument_notes(instrument: Instrument,
     notes = []
     string_roots = []
     for i in range(instrument.number_of_strings):
-        string_roots.append(tuning.notes[i % len(tuning.notes)])
+        string_roots.append(tuning.notes[len(tuning.notes) - 1 - (i % len(tuning.notes))])
     for root in string_roots:
         notes.append(get_string_notes(root=root, length=instrument.fretboard_length + 1, prefer_flats=prefer_flats))
     return notes

@@ -1,8 +1,9 @@
 import axios from 'axios';
+import { env } from '@/utils/env.js';
 
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL,
-  timeout: import.meta.env.VITE_API_TIMEOUT,
+  baseURL: env.API_BASE_URL,
+  timeout: env.API_TIMEOUT,
 });
 
 // api.interceptors.response.use(
@@ -18,4 +19,4 @@ const api = axios.create({
 //   }
 // );
 
-export default api;
+export { api };

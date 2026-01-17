@@ -49,7 +49,8 @@
 </template>
 
 <script>
-import api from '@/utils/axios';
+import { api } from '@/utils/axios';
+import { env } from '@/utils/env.js';
 
 const pageLength = 10;
 
@@ -104,7 +105,9 @@ export default {
         this.paginatedScales = response.data.scales;
       })
       .catch(error => {
-        console.error(error);
+        if (env.DEBUG) {
+          console.error(error);
+        };
       })
       .finally(() => {
         this.loading = false;

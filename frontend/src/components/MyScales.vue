@@ -27,7 +27,7 @@
         </div>
       </div>
       
-      <div v-if="paginatedScales == undefined ?? paginatedScales.length === 0" class="empty-state text-center py-5">
+      <div v-if="paginatedScales == undefined || paginatedScales.length === 0" class="empty-state text-center py-5">
         <h4>Ничего не найдено!</h4>
       </div>
     </div>
@@ -50,7 +50,7 @@
 
 <script>
 import Scales from './Scales.vue';
-import api from '@/utils/axios';
+import { api } from '@/utils/axios';
 import { useAuthStore } from '@/utils/auth_store';
 
 const pageLength = 10;
@@ -76,7 +76,9 @@ export default {
         this.paginatedScales = response.data.scales;
       })
       .catch(error => {
-        console.error(error);
+        if (env.DEBUG) {
+          console.error(error);
+        };
       })
       .finally(() => {
         this.loading = false;

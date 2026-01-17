@@ -176,7 +176,8 @@
 
 <script setup>
 import Header from '@/components/Header.vue';
-import api from '@/utils/axios';
+import { api } from '@/utils/axios';
+import { env } from '@/utils/env.js';
 </script>
 
 <script>
@@ -206,7 +207,7 @@ export default {
       fretboard_length: 0,
     }
   },
-  created() {
+  async created() {
     this.getInstruments();
   },
   computed: {
@@ -244,7 +245,9 @@ export default {
         this.all_instruments = [...response.data];
       })
       .catch(error => {
-        console.error(error);
+        if (env.DEBUG) {
+          console.error(error);
+        };
         this.error_message = error.response?.data?.detail ?? "Произошла ошибка";
       })
       .finally(() => {
@@ -277,9 +280,12 @@ export default {
       api.get(`/instrument/${this.current_instrument._id}/tunings`) 
       .then(response => {
         this.all_tunings = [...response.data];
+        this.current_tuning = this.all_tunings[0];
       })
       .catch(error => {
-        console.error(error);
+        if (env.DEBUG) {
+          console.error(error);
+        };
         this.error_message = error.response?.data?.detail ?? "Произошла ошибка";
       })
       .finally(() => {
@@ -299,7 +305,9 @@ export default {
         this.instrument_notes = [...response.data];
       })
       .catch(error => {
-        console.error(error);
+        if (env.DEBUG) {
+          console.error(error);
+        };
         this.error_message = error.response?.data?.detail ?? "Произошла ошибка";
       })
       .finally(() => {
@@ -322,7 +330,9 @@ export default {
         this.scale_notes = [...response.data];
       })
       .catch(error => {
-        console.error(error);
+        if (env.DEBUG) {
+          console.error(error);
+        };
         this.error_message = error.response?.data?.detail ?? "Произошла ошибка";
       })
       .finally(() => {
