@@ -1,16 +1,17 @@
-import math
-from typing import Annotated, Optional, Union
+from math import ceil
+from typing import Annotated, Union
+
 from bson import ObjectId
 from bson.errors import InvalidId
-from fastapi import Depends, HTTPException, Form, APIRouter, Response
-from pymongo import MongoClient
+from fastapi import APIRouter, Depends, Form, HTTPException
+from pymongo.collection import Collection
 from starlette import status
 
 from backend.app.schemas.scales_schemas import Scale
-from backend.app.utils.auth_utils import get_current_active_user, create_access_token
-from backend.app.utils.db_utils import get_users_collection, get_scales_collection
-from backend.app.schemas.user_schemas import User, UserEditForm, Token
-from backend.app.utils.loader import ACCESS_TOKEN_EXPIRE_MINUTES
+from backend.app.schemas.user_schemas import User, UserEditForm
+from backend.app.utils.auth_utils import get_current_active_user
+from backend.app.utils.db_utils import (get_scales_collection,
+                                        get_users_collection)
 
 user_router = APIRouter(prefix="/user")
 
@@ -23,12 +24,12 @@ async def read_user_me(current_user: Annotated[User, Depends(get_current_active_
 @user_router.patch("/me", status_code=status.HTTP_204_NO_CONTENT)
 async def edit_user_me(data: Annotated[UserEditForm, Form()],
                        current_user: Annotated[User, Depends(get_current_active_user)],
-                       collection: MongoClient = Depends(get_users_collection)) -> None:
+                       collection: Collection = Depends(get_users_collection)) -> None:
     try:
         current_user_objectId = ObjectId(current_user.id)
     except InvalidId:
-        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Неверный id")
-    
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Неверный ID")
+
     if data.username != current_user.username and collection.count_documents({"username": data.username}) > 0:
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Пользователь с таким именем уже существует")
 
@@ -39,7 +40,7 @@ async def edit_user_me(data: Annotated[UserEditForm, Form()],
 
 @user_router.delete("/me", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_user_me(current_user: Annotated[User, Depends(get_current_active_user)],
-                         collection: MongoClient = Depends(get_users_collection)) -> None:
+                         collection: Collection = Depends(get_users_collection)) -> None:
     result = collection.delete_one({"_id": ObjectId(current_user.id)})
     if not result.acknowledged:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Не удалось удалить пользователя")
@@ -47,27 +48,29 @@ async def delete_user_me(current_user: Annotated[User, Depends(get_current_activ
 
 @user_router.get("/me/scale")
 async def get_my_scales(current_user: Annotated[User, Depends(get_current_active_user)],
-                        length: int = 0, page : int = 1, query: str = "",
+                        length: int = 0, 
+                        page : int = 1, 
+                        query: str = "",
                         collection=Depends(get_scales_collection)) -> dict[str, Union[int, list[Scale]]]:
     if length is not None and length < 0:
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Длина должна быть больше нуля или ноль")
     if page is not None and page < 1:
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Номер страницы должен быть больше нуля")
-    
+
     user_id = current_user.id
 
-    my_scales_amount = collection.count_documents({"owner_id": user_id, "name": { "$regex": query }})
+    my_scales_amount = collection.count_documents({"owner_id": user_id, "name": {"$regex": query}})
     if length == 0:
         pages_count = my_scales_amount
     else:
-        pages_count = math.ceil(my_scales_amount / length)
+        pages_count = ceil(my_scales_amount / length)
 
-    my_scales_cursor = collection.find({"owner_id": user_id, "name": { "$regex": query }}).sort("name").skip(length * (page - 1)).limit(length)
+    my_scales_cursor = collection.find({"owner_id": user_id, "name": {"$regex": query}}).sort("name").skip(length * (page - 1)).limit(length)
     scales_list = my_scales_cursor.to_list()
     return {
         "pages": pages_count,
-        "scales": [Scale(**doc) for doc in scales_list]
-        }
+        "scales": [Scale.model_validate(doc) for doc in scales_list]
+    }
 
 
 @user_router.get("/{user_id}")
@@ -76,7 +79,7 @@ async def get_user_by_id(user_id: str,
     try:
         user = collection.find_one({"_id": ObjectId(user_id)})
     except InvalidId:
-        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Неверный id")
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Неверный ID")
     if not user:
-        raise HTTPException(status_code=status.HTTP_204_NO_CONTENT)
-    return User(**user)
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Пользователь не найден")
+    return User.model_validate(user)

@@ -1,0 +1,16 @@
+FROM node:20-alpine
+
+WORKDIR /app
+
+RUN apk add --no-cache curl
+
+COPY frontend/package*.json ./
+
+RUN npm cache clean --force && \
+    npm ci --legacy-peer-deps --include=dev
+
+COPY frontend/ .
+
+EXPOSE 3000
+
+CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0", "--port", "3000"]

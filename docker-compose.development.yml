@@ -1,0 +1,80 @@
+services:
+  # Database
+  mongodb:
+    build: 
+      context: ./db
+      dockerfile: Dockerfile.development
+    container_name: db-dev
+    restart: always
+    command: ["--quiet", "--logpath", "/dev/null"]
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 20s
+      timeout: 10s
+      start_period: 15s
+      retries: 3
+
+  # Backend
+  backend:
+    build: 
+      context: .
+      dockerfile: backend/Dockerfile.development
+    container_name: backend-dev
+    env_file:
+      - backend/.env.development
+    environment:
+      - MONGO_URI=mongodb://mongodb:27017/
+      - ENVIRONMENT=development
+      - DEBUG=true
+      - CORS_ORIGIN=http://localhost:3000
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/app/backend
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/health"]
+      interval: 30s
+      timeout: 5s
+      start_period: 15s
+      retries: 3
+    stdin_open: true
+    tty: true
+
+  # Frontend
+  frontend:
+    build: 
+      context: .
+      dockerfile: frontend/Dockerfile.development
+    container_name: frontend-dev
+    env_file:
+      - frontend/.env.development
+    environment:
+      - NODE_ENV=development
+      - VITE_API_BASE_URL=http://localhost:8000/api
+      - VITE_DEBUG=true
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    depends_on:
+      backend:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/"]
+      interval: 30s
+      timeout: 10s
+      start_period: 30s
+      retries: 3
+    stdin_open: true
+    tty: true
+
+volumes:
+  mongo-data:

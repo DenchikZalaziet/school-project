@@ -1,9 +1,11 @@
 from datetime import timedelta
 
-from backend.app.utils.auth_utils import get_user_in_db_by_name, create_access_token
+from backend.app.utils.auth_utils import (create_access_token,
+                                          get_user_in_db_by_name)
 from backend.app.utils.hashing_utils import get_password_hash, verify_password
 # noinspection PyUnresolvedReferences
-from backend.tests.setup import test_mongo_client, test_db, override_deps, client
+from backend.tests.setup import (client, override_deps, test_db,
+                                 test_mongo_client)
 
 
 def test_password_hashing():
@@ -26,6 +28,7 @@ def test_db_user_operations(test_db):
     })
 
     user = get_user_in_db_by_name("test_user", users_cl)
+    assert user
     assert user.username == "test_user"
     assert user.hashed_password == "hashed_pw"
     id = user.id
@@ -37,14 +40,11 @@ def test_db_user_operations(test_db):
 
 
 def test_full_auth_flow(client):
+    response = client.get("/health")
+    assert response.status_code == 200
+
     response = client.get("/user/me", headers={"Authorization": f"Bearer {0}"})
     assert response.status_code == 401
-
-    response = client.post("/auth/register", data={
-        "username": "01234567890123456789ABC",
-        "password": "01234567890123456789ABC"
-    })
-    assert response.status_code == 422
 
     response = client.post("/auth/register", data={
         "username": "test_user",

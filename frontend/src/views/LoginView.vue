@@ -12,7 +12,6 @@
             type="text" 
             class="form-control input-field"
             id="username"
-            maxlength="20"
             v-model="username"
             required
           >
@@ -32,13 +31,12 @@
         <button 
           type="submit" 
           class="btn login-btn w-100"
-          :disabled="!isFormValid"
-        >
+          :disabled="!isFormValid">
           Войти
         </button>
       </form>
 
-      <p v-if="error_message" class="error-box">{{ error_message }}</p>
+      <p v-if="authStore.error_message" class="error-box">{{ authStore.error_message }}</p>
       
       <div class="mt-3 text-center">
         <button type="button" class="btn btn-outline-primary mx-2" @click="redirectToHome">Главная</button>
@@ -48,32 +46,38 @@
   </div>
 </template>
 
-<script>
+<script setup>
 import { useAuthStore } from '@/utils/auth_store';
 
+const authStore = useAuthStore();
+</script>
+
+<script>
 export default {
   name: 'Login View',
   data() {
     return {
       username: '',
       password: '',
-      loading: false,
+
       error_message: ''
     }
   },
   computed: {
     isFormValid() {
-      return this.username.trim() !== '' && this.password.trim() !== '';
+      return this.username.trim()
+      && this.password.trim();
     }
   },
   methods: {
     async handleLogin() {
-      const authStore = useAuthStore();
-      await authStore.login(this.username, this.password);
-      this.error_message = authStore.error_message;
+      this.loading = true;
+      useAuthStore().login(this.username.trim(), this.password);
+      this.error_message = useAuthStore().error_message;
+      this.loading = false;
     },
     async redirectToRegister() {
-      this.$router.push('/register');
+      this.$router.push('/register/');
     },
     async redirectToHome() {
       this.$router.push('/');

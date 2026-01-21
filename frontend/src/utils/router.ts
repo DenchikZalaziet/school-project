@@ -1,12 +1,16 @@
-import { createRouter, createWebHistory, RouteRecordRaw } from 'vue-router';
+import { createRouter, createWebHistory} from 'vue-router';
+import type { RouteRecordRaw } from 'vue-router';
 
-import { useAuthStore } from './auth_store';
-import HomeView from '@/views/HomeView.vue'
-import LoginView from '@/views/LoginView.vue'
-import RegisterView from '@/views/RegisterView.vue';
-import ScalesView from '@/views/ScalesView.vue';
-import UserMeView from '@/views/UserMeView.vue';
-import ScaleIdView from '@/views/ScaleIdView.vue';
+import { useAuthStore } from './auth_store.js';
+import HomeView from '/src/views/HomeView.vue';
+import LoginView from '/src/views/LoginView.vue'
+import RegisterView from '/src/views/RegisterView.vue';
+import ScalesView from '/src/views/ScalesView.vue';
+import UserMeView from '/src/views/UserMeView.vue';
+import ScaleIdView from '/src/views/ScaleIdView.vue';
+import CreateScaleView from '/src/views/CreateScaleView.vue';
+import NotFound404View from '/src/views/NotFound404View.vue';
+import InstrumentScaleView from '/src/views/InstrumentScaleView.vue';
 
 
 
@@ -27,27 +31,39 @@ const routes: Array<RouteRecordRaw> = [
     component: RegisterView
   },
   {
-    path: '/profile/me',
+    path: '/profile/me/',
     name: 'My Profile',
     component: UserMeView,
-    meta: { requiresAuth: true }
+    meta: { requiresAuth: true, needsFetch: true }
   },
   {
-    path: '/scales',
+    path: '/scales/',
     name: 'Public Scales',
     component: ScalesView
   },
   {
     path: '/scales/:scale_id',
-    name: 'Scale',
+    name: 'Scale By ID',
     component: ScaleIdView,
-    meta: { requiresAuth: true }
+    meta: { needsFetch: true }
+  },
+  {
+    path: '/scales/create',
+    name: 'Create Scale',
+    component: CreateScaleView,
+    meta: { requiresAuth: true, needsFetch: true }
+  },
+  {
+    path: '/instrument/:scale_id',
+    name: 'Instrument Scale Representation',
+    component: InstrumentScaleView,
   },
 
   // 404
   {
     path: '/:pathMatch(.*)*',
-    redirect: '/'
+    name: '404',
+    component: NotFound404View
   }
 ];
 
@@ -56,18 +72,23 @@ const router = createRouter({
   routes
 });
 
-router.beforeEach((to, from, next) => {
+router.beforeEach(async (to, from, next) => {
+  if (to.meta.needsFetch) {
+    await useAuthStore().fetchUser();
+  }
+
+  useAuthStore().error_message = '';
+
   if (to.meta.requiresAuth) {
-    const isLoggedIn = useAuthStore().isAuthenticated
-    
+    const isLoggedIn = useAuthStore().isAuthenticated;
     if (isLoggedIn) {
       next();
     } else {
       next({ name: 'Login' });
-    }
+    };
   } else {
     next();
-  }
+  };
 });
 
 export default router;

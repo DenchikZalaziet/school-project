@@ -1,5 +1,6 @@
 # noinspection PyUnresolvedReferences
-from backend.tests.setup import test_mongo_client, test_db, override_deps, client
+from backend.tests.setup import (client, override_deps, test_db,
+                                 test_mongo_client)
 
 
 def test_user_flow(client):
@@ -21,6 +22,12 @@ def test_user_flow(client):
         "description": "test_description"
     })
     assert response.status_code == 204
+
+    response = client.patch("/user/me", headers={"Authorization": f"Bearer {token}"}, data={
+        "username": "long_desc",
+        "description": f"{'a' * 5000}"
+    })
+    assert response.status_code == 422
 
     response = client.get("/user/me", headers={"Authorization": f"Bearer {token}"})
     assert response.status_code == 200
