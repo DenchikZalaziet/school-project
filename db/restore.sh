@@ -1,12 +1,46 @@
 #!/bin/bash
 set -e
 
-echo "Waiting for MongoDB to start"
-until mongosh --eval "print(\"waited for connection\")" 2>/dev/null; do
+MAX_WAIT=60
+DUMP_DIR="/docker-entrypoint-initdb.d/dump"
+WAIT_COUNT=0
+
+echo "Waiting for MongoDB to start (max ${MAX_WAIT}s)"
+
+while [ $WAIT_COUNT -lt $MAX_WAIT ]; do
+    if mongosh --eval "db.adminCommand('ping')" --quiet >/dev/null 2>&1; then
+        echo "MongoDB is ready"
+        break
+    fi
+    
+    WAIT_COUNT=$((WAIT_COUNT + 1))
+    
+    if [ $WAIT_COUNT -eq $MAX_WAIT ]; then
+        echo "Timeout: MongoDB not available after ${MAX_WAIT} seconds" >&2
+        exit 1
+    fi
+    
+    echo "  Still waiting... (${WAIT_COUNT}/${MAX_WAIT}s)"
     sleep 1
 done
 
-echo "Starting restore"
-mongorestore /docker-entrypoint-initdb.d/dump/ || echo "Restore failed"
+if [ ! -d "$DUMP_DIR" ]; then
+    echo "Dump directory not found: $DUMP_DIR"
+    echo "Skipping restore"
+    exit 0
+fi
 
-echo "Restore completed!"
+if [ -z "$(ls -A $DUMP_DIR 2>/dev/null)" ]; then
+    echo "Dump directory is empty: $DUMP_DIR"
+    echo "Skipping restore"
+    exit 0
+fi
+
+echo "Starting MongoDB restore from: $DUMP_DIR"
+
+if mongorestore "$DUMP_DIR" --quiet; then
+    echo "Restore completed successfully"
+else
+    echo "Restore failed with exit code: $?" >&2
+    exit 1
+fi

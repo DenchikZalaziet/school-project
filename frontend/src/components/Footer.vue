@@ -9,7 +9,7 @@
         <router-link :to="`/`" class="footer-link">
           <a class="nav-link px-3 text-white">Главная</a>
         </router-link>
-        <router-link :to="`/scales`" class="footer-link">
+        <router-link :to="`/scales/`" class="footer-link">
           <a class="nav-link px-3 text-white">Гаммы</a>
         </router-link>
       </ul> 

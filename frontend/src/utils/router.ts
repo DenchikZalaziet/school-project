@@ -54,7 +54,7 @@ const routes: Array<RouteRecordRaw> = [
     meta: { requiresAuth: true, needsFetch: true }
   },
   {
-    path: '/instrument/:instrument/:tuning/:scale_id',
+    path: '/instrument/:scale_id',
     name: 'Instrument Scale Representation',
     component: InstrumentScaleView,
   },

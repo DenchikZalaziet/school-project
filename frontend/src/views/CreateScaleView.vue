@@ -168,7 +168,7 @@ export default {
       
       this.loading = true;
       
-      api.post('scale', data, {
+      api.post('/scale', data, {
         headers: { 
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${useAuthStore().token}`

@@ -1,5 +1,5 @@
 <template>
-<div class="scales-page">
+  <div class="scales-page">
 
     <div class="header-controls mb-4">
       <h1 class="page-title">Публичные гаммы</h1>

@@ -168,9 +168,7 @@ export default {
       && this.current_intervals != [];
     },
     instrumentRedirectPath() {
-      const instrument = "guitar";
-      const tuning = "standard";
-      return `/instrument/${instrument}/${tuning}/${this.scale_id}`;
+      return `/instrument/${this.scale_id}/`;
     }
   },
   methods: {

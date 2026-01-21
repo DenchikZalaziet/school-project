@@ -5,7 +5,7 @@ from backend.app.utils.loader import NOTES_LIST
 
 
 def get_note_index(note: str) -> int:
-    note = note.upper()
+    note = note.upper().replace("#", "♯").replace("b", "♭")
 
     if note == "E♯":
         note = "F"
@@ -62,7 +62,7 @@ def get_string_notes(root: str,
         notes_list = NOTES_LIST["sharps"]
 
     notes = []
-    for i in range(length):
+    for _ in range(length):
         notes.append(notes_list[note_index % 12])
         note_index += 1
     return notes
@@ -73,6 +73,8 @@ def get_instrument_notes(instrument: Instrument,
                          prefer_flats: bool = False) -> list[list[str]]:
     notes = []
     string_roots = []
+    if not tuning.notes:
+        return [[]]
     for i in range(instrument.number_of_strings):
         string_roots.append(tuning.notes[len(tuning.notes) - 1 - (i % len(tuning.notes))])
     for root in string_roots:

@@ -1,12 +1,17 @@
 import pytest
 from bson import ObjectId
+from fastapi import HTTPException
 
 from backend.app.schemas.instruments_schemas import Instrument
 from backend.app.schemas.scales_schemas import Scale
 from backend.app.schemas.tuning_schemas import Tuning
-from backend.app.utils.notes_utils import get_string_notes, get_instrument_notes, get_instrument_notes_in_a_scale
+from backend.app.utils.notes_utils import (get_instrument_notes,
+                                           get_instrument_notes_in_a_scale,
+                                           get_string_notes)
 # noinspection PyUnresolvedReferences
-from backend.tests.setup import test_mongo_client, test_db, override_deps, client, TestingStash, create_new_instrument_and_tuning
+from backend.tests.setup import (TestingStash, client,
+                                 create_new_instrument_and_tuning,
+                                 override_deps, test_db, test_mongo_client)
 
 
 def test_get_string_notes():
@@ -50,13 +55,13 @@ def test_get_instrument_notes():
                      ['B', 'C', 'D♭', 'D', 'E♭', 'E'],
                      ['A', 'B♭', 'B', 'C', 'D♭', 'D']]
 
-    with pytest.raises(ValueError):
+    with pytest.raises(HTTPException):
         Instrument(fretboard_length=-1, number_of_strings=1)
 
-    with pytest.raises(ValueError):
+    with pytest.raises(HTTPException):
         Instrument(fretboard_length=1, number_of_strings=-1)
 
-    with pytest.raises(ValueError):
+    with pytest.raises(HTTPException):
         Tuning(notes=["_"])
 
 
@@ -88,6 +93,22 @@ def test_get_instrument_notes_in_a_scale():
 
 
 def test_instrument_notes_routes(client, test_db):
+    response = client.get("/instrument")
+    assert response.status_code == 200
+    assert response.json() == []
+
+    response = client.get(f"/instrument/{ObjectId()}")
+    assert response.status_code == 404
+
+    response = client.get(f"/instrument/{1}")
+    assert response.status_code == 422
+
+    response = client.get(f"/instrument/{ObjectId()}/tunings")
+    assert response.status_code == 404
+
+    response = client.get(f"/instrument/{1}/tunings")
+    assert response.status_code == 422
+
     instruments_cl = test_db.instruments
     instruments_tunings_cl = test_db.instrument_tunings
     instrument_id = str(instruments_cl.insert_one(TestingStash.Guitar6String.model_dump(by_alias=True, exclude={"id"})).inserted_id)
@@ -143,20 +164,20 @@ def test_instrument_notes_routes(client, test_db):
     ]
 
     response = client.get(f"/notes/{ObjectId()}")
-    assert response.status_code == 204
+    assert response.status_code == 404
 
     response = client.get(f"/notes/{ObjectId()}", headers={"Authorization": f"Bearer {token}"})
-    assert response.status_code == 204
+    assert response.status_code == 404
 
     response = client.get(f"/notes/{tuning_id}/{ObjectId()}", params={
         "root": "A"
     })
-    assert response.status_code == 204
+    assert response.status_code == 404
 
     response = client.get(f"/notes/{tuning_id}/{ObjectId()}", headers={"Authorization": f"Bearer {token}"}, params={
         "root": "A"
     })
-    assert response.status_code == 204
+    assert response.status_code == 404
 
     response = client.get(f"/notes/{tuning_id}/{scale_id}", params={
         "root": "A"

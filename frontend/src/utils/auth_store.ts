@@ -111,12 +111,7 @@ export const useAuthStore = defineStore('auth', {
       this.loading = true;
       this.error_message = '';
 
-      return api.get('/user/me', {
-        headers: { 
-          'Content-Type': 'application/x-www-form-urlencoded', 
-          'Authorization': `Bearer ${this.token}`
-        }
-      })
+      return api.get('/user/me')
       .then(response => {
         this.user = response.data;
       })

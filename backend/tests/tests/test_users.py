@@ -1,5 +1,6 @@
 # noinspection PyUnresolvedReferences
-from backend.tests.setup import test_mongo_client, test_db, override_deps, client
+from backend.tests.setup import (client, override_deps, test_db,
+                                 test_mongo_client)
 
 
 def test_user_flow(client):

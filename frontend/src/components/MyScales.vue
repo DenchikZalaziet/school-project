@@ -1,11 +1,11 @@
-<template>
+<template #default="{ item: scale }">
   <div class="scales-page">
     <div class="header-controls mb-4">
       <h1 class="page-title">Мои гаммы</h1>
       <div class="controls d-flex align-items-center">
         <div class="search-box d-flex align-items-center">
           <input type="text" class="form-control" placeholder="Искать по названию..." v-model="searchQuery" @input="updateSearchURL" @keyup.enter="updateSearchURL">
-          <button type="button" class="btn btn-primary ms-4 px-2 w-75" @click="$router.push('/scales/create')">Создать гамму</button>
+          <button type="button" class="btn btn-primary ms-4 px-2 w-75" @click="$router.push('/scales/create/')">Создать гамму</button>
         </div>
       </div>
     </div>

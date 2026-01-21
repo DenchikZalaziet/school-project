@@ -81,7 +81,7 @@ export default {
     isFormValid() {
       return !this.loading 
       && this.user_info_changed 
-      && this.current_username != '';
+      && this.current_username.trim() != '';
     }
   },
   methods: { 
@@ -89,8 +89,8 @@ export default {
       this.loading = true;
 
       const formData = new FormData();
-      formData.append("username", this.current_username);
-      formData.append("description", this.current_description);
+      formData.append("username", this.current_username.trim());
+      formData.append("description", this.current_description ? this.current_description.trim() : "");
 
       api.patch('/user/me', 
         formData, {

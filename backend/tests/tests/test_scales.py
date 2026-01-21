@@ -1,11 +1,13 @@
 import pytest
 from bson import ObjectId
+from fastapi import HTTPException
 from pydantic import ValidationError
 
 from backend.app.core.scales import get_scale_notes
 from backend.app.schemas.scales_schemas import Scale
 # noinspection PyUnresolvedReferences
-from backend.tests.setup import test_mongo_client, test_db, override_deps, client
+from backend.tests.setup import (client, override_deps, test_db,
+                                 test_mongo_client)
 
 
 def test_scale_notes():
@@ -36,7 +38,7 @@ def test_scale_notes():
         Scale(name="Scale", intervals=[0])
         get_scale_notes(scale, 'not a note')
 
-    with pytest.raises(ValidationError):
+    with pytest.raises(HTTPException):
         Scale(name="Wrong scale", intervals=[-1])
 
 
@@ -64,6 +66,7 @@ def test_full_scale_flow(client):
     })
     assert response.status_code == 201
     assert response.json()["owner_id"]
+    scale_id = response.json()["_id"]
 
     response = client.get("/scale")
     assert response.status_code == 200
@@ -109,12 +112,12 @@ def test_full_scale_flow(client):
     assert response.status_code == 200
     assert len(response.json()["scales"]) == 3
 
-    scale_id = response.json()["scales"][0]["_id"]
+    assert response.json()["scales"][0]["_id"] == scale_id
     fake_scale_id = ObjectId('a' * 24)
 
     response = client.get(f"/scale/{scale_id}", headers={"Authorization": f"Bearer {token}"})
     assert response.status_code == 200
-    assert response.json()["name"]
+    assert response.json()["name"] == "A_test_scale_private"
 
     response = client.patch(f"/scale/{scale_id}", headers={"Authorization": f"Bearer {token}"}, json={
         "name": "edited_name",
@@ -127,6 +130,7 @@ def test_full_scale_flow(client):
     assert response.json()["name"] == "edited_name"
     assert response.json()["description"] == "edited_description"
     assert response.json()["category"] == "test"
+    assert response.json()["intervals"] == [3, 2, 2, 3]
 
     response = client.get(f"/scale/{scale_id}/notes", headers={"Authorization": f"Bearer {token}"}, params={"root": "A"})
     assert response.status_code == 200
@@ -144,10 +148,10 @@ def test_full_scale_flow(client):
     assert response.status_code == 422
 
     response = client.get(f"/scale/{fake_scale_id}/notes", headers={"Authorization": f"Bearer {token}"}, params={"root": "A"})
-    assert response.status_code == 204
+    assert response.status_code == 404
 
     response = client.delete(f"/scale/{fake_scale_id}", headers={"Authorization": f"Bearer {token}"})
-    assert response.status_code == 204
+    assert response.status_code == 404
 
     response = client.delete(f"/scale/{scale_id}")
     assert response.status_code == 401
@@ -159,7 +163,7 @@ def test_full_scale_flow(client):
     assert response.status_code == 204
 
     response = client.get(f"/scale/{scale_id}", headers={"Authorization": f"Bearer {token}"})
-    assert response.status_code == 204
+    assert response.status_code == 404
 
 
 def test_scale_private(client):

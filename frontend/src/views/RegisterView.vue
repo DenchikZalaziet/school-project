@@ -76,7 +76,7 @@ export default {
       this.loading = false;
     },
     async redirectToLogin() {
-      this.$router.push('/login');
+      this.$router.push('/login/');
     },
     async redirectToHome() {
       this.$router.push('/');

@@ -1,7 +1,8 @@
 from typing import Annotated
+
 from bson import ObjectId
 from bson.errors import InvalidId
-from fastapi import Depends, HTTPException, APIRouter
+from fastapi import APIRouter, Depends, HTTPException
 from starlette import status
 
 from backend.app.schemas.instruments_schemas import Instrument
@@ -9,8 +10,11 @@ from backend.app.schemas.scales_schemas import Scale
 from backend.app.schemas.tuning_schemas import Tuning
 from backend.app.schemas.user_schemas import User
 from backend.app.utils.auth_utils import get_optional_active_user
-from backend.app.utils.db_utils import get_instruments_collection, get_instrument_tunings_collection, get_scales_collection
-from backend.app.utils.notes_utils import get_instrument_notes, get_instrument_notes_in_a_scale
+from backend.app.utils.db_utils import (get_instrument_tunings_collection,
+                                        get_instruments_collection,
+                                        get_scales_collection)
+from backend.app.utils.notes_utils import (get_instrument_notes,
+                                           get_instrument_notes_in_a_scale)
 
 notes_router = APIRouter(prefix="/notes")
 
@@ -26,9 +30,9 @@ def get_instrument_tuning_notes(tuning_id: str,
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Неверный ID настройки")
 
     if not tuning:
-        raise HTTPException(status_code=status.HTTP_204_NO_CONTENT)
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Строй не найден")
 
-    found_tuning = Tuning(**tuning)
+    found_tuning = Tuning.model_validate(tuning)
 
     try:
         instrument = instruments_collection.find_one({"_id": ObjectId(tuning["instrument_id"])})
@@ -36,9 +40,9 @@ def get_instrument_tuning_notes(tuning_id: str,
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Неверный ID инструмента")
 
     if not instrument:
-        raise HTTPException(status_code=status.HTTP_204_NO_CONTENT)
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Инструмент не найден")
 
-    found_instrument = Instrument(**instrument)
+    found_instrument = Instrument.model_validate(instrument)
 
     try:
         notes = get_instrument_notes(instrument=found_instrument, tuning=found_tuning, prefer_flats=prefer_flats)
@@ -62,9 +66,9 @@ def get_instrument_tuning_scale_notes(tuning_id: str,
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Неверный ID настройки")
 
     if not tuning:
-        raise HTTPException(status_code=status.HTTP_204_NO_CONTENT)
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Строй не найден")
 
-    found_tuning = Tuning(**tuning)
+    found_tuning = Tuning.model_validate(tuning)
 
     try:
         instrument = instruments_collection.find_one({"_id": ObjectId(tuning["instrument_id"])})
@@ -72,9 +76,9 @@ def get_instrument_tuning_scale_notes(tuning_id: str,
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Неверный ID инструмента")
 
     if not instrument:
-        raise HTTPException(status_code=status.HTTP_204_NO_CONTENT)
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Инструмент не найден")
 
-    found_instrument = Instrument(**instrument)
+    found_instrument = Instrument.model_validate(instrument)
 
     try:
         scale = scales_collection.find_one({"_id": ObjectId(scale_id)})
@@ -82,9 +86,9 @@ def get_instrument_tuning_scale_notes(tuning_id: str,
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Неверный ID гаммы")
 
     if not scale:
-        raise HTTPException(status_code=status.HTTP_204_NO_CONTENT)
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Гамма не найдена")
 
-    found_scale = Scale(**scale)
+    found_scale = Scale.model_validate(scale)
 
     if not found_scale.public and current_user is None:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Приватная гамма не может быть просмотрена без входа в аккаунт")

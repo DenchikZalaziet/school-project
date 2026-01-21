@@ -77,7 +77,7 @@ export default {
       this.loading = false;
     },
     async redirectToRegister() {
-      this.$router.push('/register');
+      this.$router.push('/register/');
     },
     async redirectToHome() {
       this.$router.push('/');

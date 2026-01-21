@@ -22,7 +22,7 @@
 
         <div class="text-end" v-else>
           <button type="button" class="btn btn-outline-primary me-2 px-4" @click="$router.push('/login')">Вход</button>
-          <router-link :to="`/register`"> <button type="button" class="btn btn-primary">Регистрация</button> </router-link>
+          <router-link :to="`/register/`"> <button type="button" class="btn btn-primary">Регистрация</button> </router-link>
         </div>
       </div>
     </div>

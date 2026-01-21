@@ -1,17 +1,25 @@
 import os
+from pathlib import Path
+
 import dotenv
 
-dotenv.load_dotenv()
+ENVIRONMENT = os.getenv("ENVIRONMENT", "development")
+
+env_path = Path(__file__).parent.parent / f".env.{ENVIRONMENT}"
+if not env_path.exists():
+    env_path = Path(__file__).parent.parent / ".env"
+
+dotenv.load_dotenv(env_path)
 
 APP_NAME = os.getenv("APP_NAME", "APP_NAME")
-DEBUG = os.getenv("DEBUG", False).lower() in ('1', "true")
+DEBUG = os.getenv("DEBUG", "false").lower() in ('1', "true")
 
 MONGO_URI = os.getenv("MONGO_URI", "mongodb://localhost:27017/")
 MONGO_DB_NAME = os.getenv("MONGO_DB_NAME", "data")
 
-CORS_ORIGIN = list(os.getenv("CORS_ORIGIN", "*"))
+CORS_ORIGIN = os.getenv("CORS_ORIGIN", "*").split(',')
 
-SECRET_KEY = os.getenv("SECRET_KEY")
+SECRET_KEY = str(os.getenv("SECRET_KEY"))
 ALGORITHM = os.getenv("ALGORITHM", "HS256")
 BCRYPT_ROUNDS = os.getenv("BCRYPT_ROUNDS", 12)
 

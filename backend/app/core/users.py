@@ -1,15 +1,18 @@
 from math import ceil
 from typing import Annotated, Union
+
 from bson import ObjectId
 from bson.errors import InvalidId
-from fastapi import Depends, HTTPException, Form, APIRouter
-from pymongo import MongoClient
+from fastapi import APIRouter, Depends, Form, HTTPException
+from pymongo.collection import Collection
 from starlette import status
 
 from backend.app.schemas.scales_schemas import Scale
-from backend.app.utils.auth_utils import get_current_active_user
-from backend.app.utils.db_utils import get_users_collection, get_scales_collection
 from backend.app.schemas.user_schemas import User, UserEditForm
+from backend.app.utils.auth_utils import get_current_active_user
+from backend.app.utils.db_utils import (get_scales_collection,
+                                        get_users_collection)
+
 user_router = APIRouter(prefix="/user")
 
 
@@ -21,7 +24,7 @@ async def read_user_me(current_user: Annotated[User, Depends(get_current_active_
 @user_router.patch("/me", status_code=status.HTTP_204_NO_CONTENT)
 async def edit_user_me(data: Annotated[UserEditForm, Form()],
                        current_user: Annotated[User, Depends(get_current_active_user)],
-                       collection: MongoClient = Depends(get_users_collection)) -> None:
+                       collection: Collection = Depends(get_users_collection)) -> None:
     try:
         current_user_objectId = ObjectId(current_user.id)
     except InvalidId:
@@ -37,7 +40,7 @@ async def edit_user_me(data: Annotated[UserEditForm, Form()],
 
 @user_router.delete("/me", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_user_me(current_user: Annotated[User, Depends(get_current_active_user)],
-                         collection: MongoClient = Depends(get_users_collection)) -> None:
+                         collection: Collection = Depends(get_users_collection)) -> None:
     result = collection.delete_one({"_id": ObjectId(current_user.id)})
     if not result.acknowledged:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Не удалось удалить пользователя")
@@ -66,7 +69,7 @@ async def get_my_scales(current_user: Annotated[User, Depends(get_current_active
     scales_list = my_scales_cursor.to_list()
     return {
         "pages": pages_count,
-        "scales": [Scale(**doc) for doc in scales_list]
+        "scales": [Scale.model_validate(doc) for doc in scales_list]
     }
 
 
@@ -78,5 +81,5 @@ async def get_user_by_id(user_id: str,
     except InvalidId:
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Неверный ID")
     if not user:
-        raise HTTPException(status_code=status.HTTP_204_NO_CONTENT)
-    return User(**user)
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Пользователь не найден")
+    return User.model_validate(user)

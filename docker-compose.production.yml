@@ -1,0 +1,153 @@
+services:
+  # Database
+  mongodb:
+    build:
+      context: ./db
+      dockerfile: Dockerfile.production
+    container_name: db-prod
+    restart: unless-stopped
+    command: ["--quiet", "--logpath", "/dev/null"]
+    volumes:
+      - mongo-data-prod:/data/db
+      - ./db/backup:/backup
+    networks:
+      - music-network
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 30s
+      timeout: 10s
+      start_period: 40s
+      retries: 3
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+        reservations:
+          memory: 512M
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # Backend
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile.production
+    container_name: backend-prod
+    env_file:
+      - backend/.env.production
+    environment:
+      - MONGO_URI=mongodb://mongodb:27017/
+      - ENVIRONMENT=production
+      - DEBUG=false
+      - CORS_ORIGIN=http://localhost:8080,http://localhost:3000,http://192.168.1.118:8080
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    networks:
+      - music-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/health"]
+      interval: 30s
+      timeout: 5s
+      start_period: 30s
+      retries: 5
+    read_only: true
+    tmpfs:
+      - /tmp
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: '1.0'
+        reservations:
+          memory: 256M
+          cpus: '0.5'
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # Frontend
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile.production
+    container_name: frontend-prod
+    environment:
+      - NODE_ENV=production
+      - VITE_API_BASE_URL=/api
+      - VITE_DEBUG=false
+    networks:
+      - music-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/"]
+      interval: 30s
+      timeout: 10s
+      start_period: 30s
+      retries: 3
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+          cpus: '0.5'
+        reservations:
+          memory: 128M
+          cpus: '0.25'
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  nginx-proxy:
+    image: nginx:alpine
+    container_name: nginx-proxy-prod
+    ports:
+      - "0.0.0.0:8080:80"
+    volumes:
+      - ./nginx/nginx.production.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/logs:/var/log/nginx
+      - ./nginx/cache:/var/cache/nginx
+    depends_on:
+      frontend:
+        condition: service_healthy
+      backend:
+        condition: service_healthy
+    networks:
+      - music-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "sh", "-c", "curl -f http://localhost/api/health || exit 1"]
+      interval: 30s
+      timeout: 5s
+      start_period: 10s
+      retries: 3
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+        reservations:
+          memory: 64M
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+networks:
+  music-network:
+    driver: bridge
+
+    external: false
+
+volumes:
+  mongo-data-prod:
+    driver: local
+    labels:
+      - "com.musicapp.data=true"

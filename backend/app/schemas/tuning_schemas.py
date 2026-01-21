@@ -1,9 +1,13 @@
-from typing import Optional
-from pydantic import BaseModel, field_validator, Field
+from typing import Optional, Union
+
+from bson import ObjectId
 from fastapi import HTTPException
+from pydantic import BaseModel, Field, field_validator
 from starlette import status
 
-from backend.app.utils.loader import NOTES_LIST, DESCRIPTION_MAX_LENGTH, DESCRIPTION_MAX_LENGTH, CATEGORY_MAX_LENGTH
+from backend.app.utils.loader import (CATEGORY_MAX_LENGTH,
+                                      DESCRIPTION_MAX_LENGTH, NAME_MAX_LENGTH,
+                                      NOTES_LIST)
 from backend.app.utils.schemas_utils import check_length, validate_id
 
 
@@ -18,12 +22,25 @@ class Tuning(BaseModel):
     category: Optional[str] = None
     notes: Optional[list[str]] = []
 
-    _validate_id: classmethod = field_validator("id", mode="before")(validate_id)
-    _validate_instrument_id: classmethod = field_validator("instrument_id", mode="before")(validate_id)
+    @field_validator("id", mode="before")
+    def _validate_id(cls, val: Union[ObjectId, str]) -> str:
+        return validate_id(val)
+    
+    @field_validator("instrument_id", mode="before")
+    def _validate__instrument_id(cls, val: Union[ObjectId, str]) -> str:
+        return validate_id(val)
 
-    _check_name_length: classmethod = field_validator("name")(lambda val: check_length(val, DESCRIPTION_MAX_LENGTH))
-    _check_description_length: classmethod = field_validator("description")(lambda val: check_length(val, DESCRIPTION_MAX_LENGTH))
-    _check_category_length: classmethod = field_validator("category")(lambda val: check_length(val, CATEGORY_MAX_LENGTH))
+    @field_validator("name")
+    def _check_name_length(cls, val: str) -> str:
+        return check_length(val, NAME_MAX_LENGTH)
+
+    @field_validator("description")
+    def _check_description_length(cls, val: str) -> str:
+        return check_length(val, DESCRIPTION_MAX_LENGTH)
+    
+    @field_validator("category")
+    def _check_category_length(cls, val: str) -> str:
+        return check_length(val, CATEGORY_MAX_LENGTH)
 
     @field_validator("notes", mode="before")
     def check_notes_exist(cls, values: list[str]):
