@@ -59,8 +59,6 @@ export default {
     return {
       username: '',
       password: '',
-
-      error_message: ''
     }
   },
   computed: {
@@ -73,7 +71,6 @@ export default {
     async handleLogin() {
       this.loading = true;
       useAuthStore().login(this.username.trim(), this.password);
-      this.error_message = useAuthStore().error_message;
       this.loading = false;
     },
     async redirectToRegister() {
