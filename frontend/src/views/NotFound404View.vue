@@ -1,4 +1,5 @@
-<template> 
+<template>
+  <MusicBackground />
   <div class="container mb-5 p-4">
     <div class="empty-state row text-center justify-content-center py-5">
       <h1>404 - Страница не найдена!</h1>
@@ -12,6 +13,7 @@
 </template>
 
 <script setup>
+import MusicBackground from '@/components/MusicBackground.vue';
 </script>
 
 <script>

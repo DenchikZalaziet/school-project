@@ -1,7 +1,7 @@
 <template>
-  <Header></Header>
-
-  <div class="container mt-4 p-1">
+  <MusicBackground />
+  <Header />
+  <div class="container mt-3">
     <div class="selection-container mb-5 bg-white rounded-3 p-5 shadow-sm mx-auto" style="max-width: 1200px;">
       <div class="row g-5 align-items-end justify-content-center">
         <div class="col-lg-5">
@@ -116,7 +116,7 @@
   </div>
 
   <div class="fretboard-wrapper" v-if="showFretboard">
-    <div class="fretboard-container mt-5">
+    <div class="fretboard-container">
       <div v-if="scaleLoading" class="text-center py-5">
         <div class="spinner-border text-primary" style="width: 3rem; height: 3rem;"></div>
         <p class="mt-3 text-muted fs-5">Загружаем аппликатуру...</p>
@@ -195,6 +195,7 @@
 </template>
 
 <script>
+import MusicBackground from '@/components/MusicBackground.vue';
 import Header from '@/components/Header.vue';
 import { api } from '@/utils/axios';
 import { env } from '@/utils/env.js';
@@ -202,7 +203,8 @@ import { env } from '@/utils/env.js';
 export default {
   name: 'InstrumentScaleView',
   components: {
-    Header
+    Header,
+    MusicBackground,
   },
   data() {
     return {

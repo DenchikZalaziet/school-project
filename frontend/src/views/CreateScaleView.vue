@@ -1,5 +1,6 @@
 <template>
-  <Header></Header>
+  <MusicBackground />
+  <Header />
   <div class="container mb-5">
     <div id="app">
       <div class="container mb-5 p-4">
@@ -98,6 +99,7 @@
 </template>
 
 <script setup>
+import MusicBackground from '@/components/MusicBackground.vue';
 import Header from '@/components/Header.vue';
 import { api } from '@/utils/axios';
 import { useAuthStore } from '@/utils/auth_store';

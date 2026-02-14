@@ -1,5 +1,6 @@
 <template>
-  <Header></Header>
+  <MusicBackground />
+  <Header />
   <div class="profile-card card border-0 shadow-sm d-flex justify-content-center my-4">
     <div class="card-body p-4">
       <form @submit.prevent="submitUserInfo">
@@ -52,10 +53,11 @@
     </div>
   </div>
 
-  <MyScales> </MyScales>
+  <MyScales />
 </template>
 
 <script setup>
+import MusicBackground from '@/components/MusicBackground.vue';
 import Header from '@/components/Header.vue'
 import MyScales from '@/components/MyScales.vue';
 import { useAuthStore } from '@/utils/auth_store';

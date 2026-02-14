@@ -1,5 +1,6 @@
 <template>
-  <Header></Header>
+  <MusicBackground />
+  <Header />
   <div class="container text-center py-5">
     <div class="hero-section mb-5">
       <h1 class="display-4 fw-bold mb-3 text-gradient">Добро пожаловать!</h1>
@@ -53,6 +54,7 @@
 </template>
 
 <script setup>
+import MusicBackground from '@/components/MusicBackground.vue';
 import Header from '@/components/Header.vue';
 import { useAuthStore } from '@/utils/auth_store';
 import { computed } from 'vue';
@@ -104,7 +106,6 @@ export default {
   transform: scale(1.1);
 }
 
-/* Улучшенные стили для кнопок */
 .btn-primary, .btn-outline-primary {
   padding: 0.75rem 2rem;
   border-radius: 8px;
@@ -143,7 +144,7 @@ export default {
 }
 
 .cta-section {
-  border-top: 1px solid rgba(0, 0, 0, 0.08);
+  border-top: 2px solid rgba(0, 0, 0, 0.1);
   padding-top: 2rem;
 }
 
