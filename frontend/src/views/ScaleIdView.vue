@@ -1,5 +1,6 @@
 <template>
-  <Header></Header>
+  <MusicBackground />
+  <Header />
   <div class="container mb-5 p-4">
     <div v-if="no_content" class="empty-state text-center py-5">
       <h2>{{ no_content_message }}</h2>
@@ -124,6 +125,7 @@
 </template>
 
 <script setup>
+import MusicBackground from '@/components/MusicBackground.vue';
 import Header from '@/components/Header.vue';
 import { api } from '@/utils/axios';
 import { useAuthStore } from '@/utils/auth_store';

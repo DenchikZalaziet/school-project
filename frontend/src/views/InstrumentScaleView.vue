@@ -1,6 +1,6 @@
 <template>
-  <Header></Header>
-
+  <MusicBackground />
+  <Header />
   <div class="container mt-3">
     <div class="selection-container mb-5 bg-white rounded-3 p-5 shadow-sm mx-auto" style="max-width: 1200px;">
       <div class="row g-5 align-items-end justify-content-center">
@@ -195,6 +195,7 @@
 </template>
 
 <script>
+import MusicBackground from '@/components/MusicBackground.vue';
 import Header from '@/components/Header.vue';
 import { api } from '@/utils/axios';
 import { env } from '@/utils/env.js';
@@ -202,7 +203,8 @@ import { env } from '@/utils/env.js';
 export default {
   name: 'InstrumentScaleView',
   components: {
-    Header
+    Header,
+    MusicBackground,
   },
   data() {
     return {
