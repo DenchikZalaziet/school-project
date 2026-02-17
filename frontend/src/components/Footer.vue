@@ -15,7 +15,7 @@
       </ul> 
       
       <a href="#top" class="d-block my-2 text-white nav-link top-link footer-link">Вернуться наверх ↑</a>
-      <p class="mb-0 text-white-50">© 2025 Школьный проект по информатике</p>
+      <p class="mb-0 text-white-50">2026 Школьный проект по информатике</p>
     </div>
   </footer>
 </template>
