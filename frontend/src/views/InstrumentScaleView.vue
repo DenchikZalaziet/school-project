@@ -68,8 +68,8 @@
       </div>
     </div>
 
-    <div class="scale-controls-container d-flex justify-content-center" v-if="current_instrument && current_tuning">
-      <div class="scale-controls">
+    <div class="scale-controls-container d-flex justify-content-center">
+      <div class="scale-controls" :class="{ invisible: !(current_instrument && current_tuning) }">
         <div class="root-note-selector">
           <label class="mb-2 fs-5 fw-bold">Тоника:</label>
           <div class="note-buttons">
@@ -114,10 +114,9 @@
       </div>
     </div>
   </div>
-
   <div class="fretboard-wrapper" v-if="showFretboard">
     <div class="fretboard-container">
-      <div v-if="scaleLoading" class="text-center py-5">
+      <div v-if="scaleLoading" class="fretboard-loader">
         <div class="spinner-border text-primary" style="width: 3rem; height: 3rem;"></div>
         <p class="mt-3 text-muted fs-5">Загружаем аппликатуру...</p>
       </div>
@@ -515,8 +514,6 @@ export default {
     },
     
     beforeFretboardEnter(el) {
-      el.style.position = 'absolute';
-      el.style.width = '100%';
       el.style.opacity = '0';
       el.style.transform = 'translateY(20px)';
     },
@@ -525,20 +522,15 @@ export default {
       this.isAnimating = true;
       
       requestAnimationFrame(() => {
-        el.style.position = '';
-        el.style.width = '';
+        el.style.transition = 'all 0.3s ease';
+        el.style.opacity = '1';
+        el.style.transform = 'translateY(0)';
         
         setTimeout(() => {
-          el.style.transition = 'all 0.3s ease';
-          el.style.opacity = '1';
-          el.style.transform = 'translateY(0)';
-          
-          setTimeout(() => {
-            el.style.transition = '';
-            this.isAnimating = false;
-            done();
-          }, 300);
-        }, 50);
+          el.style.transition = '';
+          this.isAnimating = false;
+          done();
+        }, 300);
       });
     },
     
@@ -562,46 +554,188 @@ export default {
 .fade-slide-enter-active,
 .fade-slide-leave-active {
   transition: all 0.3s ease;
-  position: relative;
 }
-
 .fade-slide-enter-from {
   opacity: 0;
   transform: translateY(20px);
 }
-
 .fade-slide-leave-to {
   opacity: 0;
   transform: translateY(-20px);
 }
 
+.selection-container {
+  transition: opacity 0.3s ease;
+  background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+}
 .selection-container.loading {
   opacity: 0.7;
   pointer-events: none;
 }
 
+.custom-dropdown {
+  appearance: none;
+  border: 2px solid #e0e0e0;
+  border-radius: 12px;
+  padding: 1rem 3rem 1rem 1.5rem;
+  color: #1a365d;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  width: 100%;
+  height: 56px;
+  font-size: 1.1rem;
+}
+.custom-dropdown:focus {
+  border-color: #4da6ff;
+  box-shadow: 0 0 0 0.35rem rgba(77, 166, 255, 0.25);
+  outline: none;
+}
+.custom-dropdown:disabled {
+  background-color: #f8f9fa;
+  color: #6c757d;
+  cursor: not-allowed;
+}
+.dropdown-wrapper {
+  position: relative;
+}
+.dropdown-loader {
+  position: absolute;
+  right: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 2;
+}
+.form-group {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+.form-label {
+  flex-shrink: 0;
+}
+
+.scale-controls-container {
+  margin-bottom: 2.5rem;
+}
+.scale-controls {
+  display: inline-flex;
+  gap: 3rem;
+  align-items: center;
+  flex-wrap: wrap;
+  padding: 2rem;
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+  max-width: 100%;
+  border: 1px solid rgba(0,0,0,0.05);
+}
+.scale-controls.invisible {
+  visibility: hidden;
+  pointer-events: none;
+}
+.root-note-selector, .preference-toggle {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+.root-note-selector label, .preference-toggle label {
+  font-weight: bold;
+  color: #1a365d;
+  min-width: 90px;
+  margin-bottom: 0;
+}
+.note-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  max-width: 500px;
+}
+.note-button {
+  padding: 0.6rem 1rem;
+  border: 2px solid #e0e0e0;
+  background: white;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-weight: bold;
+  min-width: 52px;
+  font-size: 1.1rem;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+.note-button:hover {
+  background: #ebf8ff;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+.note-button.active {
+  background: #4da6ff;
+  color: white;
+  border-color: #1a365d;
+  box-shadow: 0 4px 12px rgba(77, 166, 255, 0.4);
+  transform: translateY(-1px);
+}
+.toggle-switch {
+  display: flex;
+  border: 2px solid #e0e0e0;
+  border-radius: 10px;
+  overflow: hidden;
+  background: white;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+.toggle-option {
+  padding: 0.8rem 1.5rem;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-weight: bold;
+  min-width: 110px;
+  font-size: 1.1rem;
+}
+.toggle-option:hover {
+  background: #ebf8ff;
+  transform: translateY(-1px);
+}
+.toggle-option.active {
+  background: #4da6ff;
+  color: white;
+  box-shadow: 0 2px 8px rgba(77, 166, 255, 0.3);
+}
+
 .fretboard-wrapper {
   position: relative;
   min-height: 400px;
+  will-change: transform;
 }
-
 .fretboard-container {
+  position: relative;
+  height: 420px;
   padding: 25px;
   overflow-x: auto;
-  min-height: 350px;
-  position: relative;
+  background: #f0f8ff;
+  border-radius: 12px;
 }
-
 .fretboard {
   display: inline-flex;
   flex-direction: column;
-  position: relative;
   background: linear-gradient(to bottom, #7edaff, #91caff);
   border-radius: 12px;
   padding: 20px 15px;
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
   min-width: 100%;
   border: 1px solid rgba(255,255,255,0.2);
+  height: 100%;
+}
+.fretboard-loader {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background: rgba(255,255,255,0.9);
+  border-radius: 12px;
+  z-index: 10;
 }
 
 .string-row {
@@ -610,7 +744,6 @@ export default {
   position: relative;
   height: 55px;
 }
-
 .string-row::after {
   content: '';
   position: absolute;
@@ -624,7 +757,6 @@ export default {
   border-bottom: none;
   border-top: none;
 }
-
 .open-note {
   width: 75px;
   display: flex;
@@ -633,13 +765,11 @@ export default {
   z-index: 2;
   color: #fff;
 }
-
 .open-note .fret-note {
   width: 45px;
   height: 45px;
   position: relative;
 }
-
 .scale-indicator {
   position: absolute;
   bottom: 2px;
@@ -648,7 +778,6 @@ export default {
   color: #ffeb3b;
   font-weight: bold;
 }
-
 .nut {
   width: 10px;
   height: 110%;
@@ -659,7 +788,6 @@ export default {
   border-radius: 4px;
   box-shadow: inset 0 0 5px rgba(0,0,0,0.3);
 }
-
 .fret-cell {
   flex: 1;
   min-width: 65px;
@@ -670,11 +798,9 @@ export default {
   position: relative;
   border-right: 3px solid #333;
 }
-
 .fret-cell:last-child {
   border-right: none;
 }
-
 .fret-note {
   width: 42px;
   height: 42px;
@@ -691,51 +817,37 @@ export default {
   position: relative;
   font-size: 1rem;
 }
-
 .scale-note {
   background-color: #1a365d;
 }
-
 .scale-note:hover {
   background-color: #4da6ff;
   transform: scale(1.1);
 }
-
 .root-note {
   background-color: #ff4757 !important;
   animation: pulse 2s infinite;
 }
-
 .root-note:hover {
   background-color: #ff6b81 !important;
   transform: scale(1.1);
 }
-
 @keyframes pulse {
-  0% {
-    box-shadow: 0 0 0 0 rgba(255, 71, 87, 0.7);
-  }
-  70% {
-    box-shadow: 0 0 0 10px rgba(255, 71, 87, 0);
-  }
-  100% {
-    box-shadow: 0 0 0 0 rgba(255, 71, 87, 0);
-  }
+  0% { box-shadow: 0 0 0 0 rgba(255, 71, 87, 0.7); }
+  70% { box-shadow: 0 0 0 10px rgba(255, 71, 87, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(255, 71, 87, 0); }
 }
-
 .non-scale-note {
   opacity: 0.7;
   background-color: #6693c0 !important;
   filter: grayscale(0.2);
 }
-
 .non-scale-note:hover {
   opacity: 0.8;
   background-color: #7f8c8d !important;
   filter: grayscale(0.5);
   transform: scale(1.05);
 }
-
 .root-indicator {
   position: absolute;
   top: -6px;
@@ -753,18 +865,15 @@ export default {
   box-shadow: 0 2px 4px rgba(0,0,0,0.2);
   z-index: 3;
 }
-
 .note-label {
   font-size: 15px;
   font-weight: bold;
 }
-
 .fret-markers {
   display: flex;
   margin-top: 15px;
   height: 25px;
 }
-
 .fret-marker {
   flex: 1;
   min-width: 65px;
@@ -773,13 +882,11 @@ export default {
   align-items: center;
   position: relative;
 }
-
 .fret-marker:first-child {
   width: 80px;
   min-width: 80px;
   flex: none;
 }
-
 .fret-dot {
   width: 18px;
   height: 18px;
@@ -794,182 +901,20 @@ export default {
   box-shadow: 0 2px 4px rgba(0,0,0,0.2);
 }
 
-.custom-dropdown {
-  appearance: none;
-  border: 2px solid #e0e0e0;
-  border-radius: 12px;
-  padding: 1rem 3rem 1rem 1.5rem;
-  color: #1a365d;
-  font-weight: 500;
-  transition: all 0.3s ease;
-  width: 100%;
-  height: 56px;
-  font-size: 1.1rem;
-}
-
-.custom-dropdown:focus {
-  border-color: #4da6ff;
-  box-shadow: 0 0 0 0.35rem rgba(77, 166, 255, 0.25);
-  outline: none;
-}
-
-.custom-dropdown:disabled {
-  background-color: #f8f9fa;
-  color: #6c757d;
-  cursor: not-allowed;
-}
-
-.dropdown-wrapper {
-  position: relative;
-}
-
-.dropdown-loader {
-  position: absolute;
-  right: 15px;
-  top: 50%;
-  transform: translateY(-50%);
-  z-index: 2;
-}
-
-.form-group {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-}
-
-.form-label {
-  flex-shrink: 0;
-}
-
-.dropdown-wrapper {
-  flex-grow: 1;
-  min-height: 56px;
-}
-
-.scale-controls-container {
-  margin-bottom: 2.5rem;
-}
-
-.scale-controls {
-  display: inline-flex;
-  gap: 3rem;
-  align-items: center;
-  flex-wrap: wrap;
-  padding: 2rem;
-  background: white;
-  border-radius: 16px;
-  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-  max-width: 100%;
-  border: 1px solid rgba(0,0,0,0.05);
-}
-
-.root-note-selector, .preference-toggle {
-  display: flex;
-  align-items: center;
-  gap: 1.5rem;
-}
-
-.root-note-selector label, .preference-toggle label {
-  font-weight: bold;
-  color: #1a365d;
-  min-width: 90px;
-  margin-bottom: 0;
-}
-
-.note-buttons {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.4rem;
-  max-width: 500px;
-}
-
-.note-button {
-  padding: 0.6rem 1rem;
-  border: 2px solid #e0e0e0;
-  background: white;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  font-weight: bold;
-  min-width: 52px;
-  font-size: 1.1rem;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-}
-
-.note-button:hover {
-  background: #ebf8ff;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-}
-
-.note-button.active {
-  background: #4da6ff;
-  color: white;
-  border-color: #1a365d;
-  box-shadow: 0 4px 12px rgba(77, 166, 255, 0.4);
-  transform: translateY(-1px);
-}
-
-.flat-note {
-  position: relative;
-}
-
-.sharp-note {
-  position: relative;
-}
-
-.toggle-switch {
-  display: flex;
-  border: 2px solid #e0e0e0;
-  border-radius: 10px;
-  overflow: hidden;
-  background: white;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-}
-
-.toggle-option {
-  padding: 0.8rem 1.5rem;
-  border: none;
-  background: transparent;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  font-weight: bold;
-  min-width: 110px;
-  font-size: 1.1rem;
-}
-
-.toggle-option:hover {
-  background: #ebf8ff;
-  transform: translateY(-1px);
-}
-
-.toggle-option.active {
-  background: #4da6ff;
-  color: white;
-  box-shadow: 0 2px 8px rgba(77, 166, 255, 0.3);
-}
-
 @media (max-width: 1200px) {
   .selection-container {
     max-width: 1000px !important;
   }
 }
-
 @media (max-width: 992px) {
   .selection-container {
     max-width: 800px !important;
   }
-  
   .col-lg-5 {
     width: 100%;
     max-width: 500px;
     margin: 0 auto;
   }
-  
-  .scale-controls-container {
-    justify-content: flex-start;
-  }
-  
   .scale-controls {
     width: 100%;
     flex-direction: column;
@@ -977,124 +922,82 @@ export default {
     gap: 1.5rem;
     padding: 1.5rem;
   }
-  
   .root-note-selector, .preference-toggle {
     width: 100%;
   }
-  
   .note-buttons {
     max-width: 100%;
   }
-  
   .fret-cell {
     min-width: 50px;
   }
-  
   .fret-note {
     width: 36px;
     height: 36px;
   }
-  
   .open-note {
     width: 65px;
   }
-  
   .open-note .fret-note {
     width: 38px;
     height: 38px;
   }
-  
   .note-label {
     font-size: 13px;
   }
-  
   .fret-marker {
     min-width: 50px;
   }
-  
   .fret-marker:first-child {
     width: 70px;
     min-width: 70px;
   }
-  
   .custom-dropdown {
     height: 52px;
     font-size: 1rem;
   }
 }
-
 @media (max-width: 768px) {
   .selection-container {
     padding: 1.5rem !important;
   }
-  
   .fret-cell {
     min-width: 45px;
   }
-  
   .fret-note {
     width: 32px;
     height: 32px;
     font-size: 0.9rem;
   }
-  
   .open-note {
     width: 60px;
   }
-  
   .open-note .fret-note {
     width: 35px;
     height: 35px;
   }
-  
   .note-label {
     font-size: 12px;
   }
-  
   .fret-marker {
     min-width: 45px;
   }
-  
   .fret-marker:first-child {
     width: 65px;
     min-width: 65px;
   }
-  
   .scale-controls {
     padding: 1.2rem;
   }
-  
   .note-button {
     min-width: 48px;
     padding: 0.5rem 0.8rem;
     font-size: 1rem;
   }
-  
   .toggle-option {
     min-width: 100px;
     padding: 0.7rem 1.2rem;
     font-size: 1rem;
   }
-}
-
-.selection-container {
-  transition: opacity 0.3s ease;
-  background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
-}
-
-.selection-container.loading {
-  opacity: 0.7;
-}
-
-.fretboard-container {
-  contain: layout style paint;
-}
-
-.string-row {
-  contain: layout;
-}
-
-.fretboard-wrapper {
-  will-change: transform;
 }
 </style>
