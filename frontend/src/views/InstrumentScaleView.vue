@@ -709,7 +709,7 @@ export default {
 }
 .fretboard-container {
   position: relative;
-  height: 420px;
+  height: auto;
   padding: 25px;
   overflow-x: auto;
   background: #f0f8ff;

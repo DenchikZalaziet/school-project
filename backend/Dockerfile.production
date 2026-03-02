@@ -25,10 +25,10 @@ RUN useradd -m -u 1000 appuser && \
 
 RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
 
-COPY --from=builder /opt/venv /opt/venv
+COPY --from=builder --chown=appuser:appuser /opt/venv /opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
 
-COPY backend/ ./backend/
+COPY --chown=appuser:appuser backend/ ./backend/
 
 USER appuser
 
