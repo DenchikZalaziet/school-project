@@ -1,32 +1,53 @@
-# Школьный проект
+# 🎸 PolyFret — веб-приложение для музыкантов
 
-### Веб-приложение для музыкантов: создание гамм, визуализация на грифе инструментов.
+Приложение для создания гамм и их визуализации на грифе струнных инструментов.
 
-## Технологии
-- **Backend**: FastAPI, MongoDB, JWT, Pytest
-- **Frontend**: Vue 3, TypeScript, Bootstrap 5, Pinia
-- **DevOps**: Docker, Docker Compose, Nginx
-
-## Backend
-### Из корня
-- Запуск сервера с автоматическим обновлением при изменения (dev): <br>
-``` uvicorn backend.app.main:app --env-file ./backend/.env.development ``` <br>
-
-<br>
-
-- Запуск всех тестов: <br>
-``` pytest backend/tests ``` <br>
+Проект выполнен в рамках учебной деятельности.
 
 
-## Frontend
-### Из корня
-- Запуск фронтэнда <br>
-``` npm run dev --prefix frontend ``` 
+## ✨ Возможности
 
-## После запуска:
+- Построение гамм (мажор, минор, пентатоника и др.) и создание собственных
+- Отображение нот на грифе струнного инструмента
+- Симуляция звуков алгоритмом Карплуса — Стронга
+- Поддержка многих инструментов и строев
+- Регистрация / авторизация (JWT)
+
+## 🛠 Технологии
+
+| Слой     | Технологии                            |
+| -------- | ------------------------------------- |
+| Frontend | Vue 3, TypeScript, Bootstrap 5, Pinia |
+| Backend  | FastAPI, MongoDB, JWT, Pytest         |
+| DevOps   | Docker, Docker Compose, Nginx         |
+
+## 🚀 Запуск проекта
+
+При первом запуске через docker-compose, данные автоматически загружаются из папки `db/dump`.
+
+### Ручной запуск
+
+#### Backend
+
+Из корня проекта:
+
+    uvicorn backend.app.main:app --env-file ./backend/.env.development
+
+#### Frontend
+
+Из корня проекта:
+
+    npm run dev --prefix frontend
+
+После запуска:
+
 - Frontend: http://localhost:3000
 - Backend API: http://localhost:8000
-- API Docs: http://localhost:8000/docs
+- Документация API: http://localhost:8000/docs
 
-## Данные
-При создании контейнера через Docker Compose автоматически загружаются данные из дампа `/bd/dump`
+## 🧪 Тестирование
+
+Запуск всех тестов (из корня проекта):
+
+    pytest backend/tests
+
