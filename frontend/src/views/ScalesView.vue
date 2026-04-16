@@ -5,8 +5,8 @@
 </template>
 
 <script setup>
-import MusicBackground from '@/components/MusicBackground.vue';
 import Header from '@/components/Header.vue';
+import MusicBackground from '@/components/MusicBackground.vue';
 import Scales from '@/components/Scales.vue';
 </script>
 

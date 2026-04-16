@@ -59,7 +59,7 @@ export default {
   data() {
     return {
       searchQuery: this.$route.query.q ?? "",
-      currentPage: parseInt(this.$route.query.page) ?? 1,
+      currentPage: isNaN(parseInt(this.$route.query.page)) ? 1 : parseInt(this.$route.query.page),
       totalPages: 1,
       paginatedScales: [],
       loading: false,
@@ -119,7 +119,7 @@ export default {
     '$route.query': {
       handler(newQuery) {
         this.searchQuery = newQuery.q ?? "";
-        this.currentPage = parseInt(newQuery.page) ?? 1;
+        this.currentPage = isNaN(parseInt(newQuery.page)) ? 1 : parseInt(newQuery.page);
         this.loadScalesPage();
       },
       immediate: true
@@ -193,6 +193,11 @@ export default {
   color: var(--dark-blue);
   margin: 0;
   font-size: 1.5rem;
+
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
 }
 
 .scale-description {

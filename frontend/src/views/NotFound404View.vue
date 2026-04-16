@@ -12,13 +12,14 @@
   </div>
 </template>
 
-<script setup>
-import MusicBackground from '@/components/MusicBackground.vue';
-</script>
-
 <script>
+import MusicBackground from '@/components/MusicBackground.vue';
+
 export default {
   name: '404 Error View',
+  components: {
+    MusicBackground
+  }
 }
 </script>
 

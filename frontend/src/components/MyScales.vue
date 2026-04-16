@@ -49,9 +49,9 @@
 </template>
 
 <script>
-import Scales from './Scales.vue';
-import { api } from '@/utils/axios';
 import { useAuthStore } from '@/utils/auth_store';
+import { api } from '@/utils/axios';
+import Scales from './Scales.vue';
 
 const pageLength = 10;
 
@@ -154,6 +154,11 @@ export default {
   color: var(--dark-blue);
   margin: 0;
   font-size: 1.5rem;
+
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
 }
 
 .scale-description {

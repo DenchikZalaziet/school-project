@@ -15,22 +15,23 @@ from backend.app.utils.loader import APP_NAME, CORS_ORIGIN, DEBUG
 
 logging.basicConfig(
     level=logging.DEBUG if DEBUG else logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
     handlers=[
         logging.StreamHandler(),
-    ]
+    ],
 )
 
 logging.getLogger("passlib.handlers.bcrypt").setLevel(logging.ERROR)
 
-app = FastAPI(title=APP_NAME,
-              version="1.0.0",
-              description="School Project Music API",
-              lifespan=lifespan,
-              docs_url="/docs" if DEBUG else None,
-              redoc_url="/redoc" if DEBUG else None,
-              openapi_url="/openapi.json" if DEBUG else None,
-              root_path="/api"
+app = FastAPI(
+    title=APP_NAME,
+    version="1.0.0",
+    description="API школьного проекта по информатике",
+    lifespan=lifespan,
+    docs_url="/docs" if DEBUG else None,
+    redoc_url="/redoc" if DEBUG else None,
+    openapi_url="/openapi.json" if DEBUG else None,
+    root_path="/api",
 )
 
 app.add_middleware(
@@ -51,7 +52,7 @@ app.include_router(notes_router, tags=["Notes"])
 @app.get("")
 async def root() -> dict:
     return {"msg": "connected"}
-    
+
 
 @app.get("/health")
 async def health_check() -> dict:
@@ -61,26 +62,26 @@ async def health_check() -> dict:
             return {
                 "status": "unhealthy",
                 "database": "disconnected",
-                "timestamp": datetime.now(timezone.utc).isoformat()
+                "timestamp": datetime.now(timezone.utc).isoformat(),
             }
-        client.admin.command('ping')
-        
-        db_stats = client.admin.command('dbStats')
+        client.admin.command("ping")
+
+        db_stats = client.admin.command("dbStats")
 
         return {
             "status": "healthy",
             "database": "connected",
             "database_stats": {
-                "collections": db_stats.get('collections', 0),
-                "objects": db_stats.get('objects', 0),
-                "data_size": db_stats.get('dataSize', 0)
+                "collections": db_stats.get("collections", 0),
+                "objects": db_stats.get("objects", 0),
+                "data_size": db_stats.get("dataSize", 0),
             },
-            "timestamp": datetime.now(timezone.utc).isoformat()
+            "timestamp": datetime.now(timezone.utc).isoformat(),
         }
     except ConnectionFailure:
         logging.error("Database connection failed")
         return {
             "status": "unhealthy",
             "database": "disconnected",
-            "timestamp": datetime.now(timezone.utc).isoformat()
+            "timestamp": datetime.now(timezone.utc).isoformat(),
         }

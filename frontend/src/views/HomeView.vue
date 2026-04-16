@@ -65,7 +65,11 @@ const isAuthenticated = computed(() => authStore.isAuthenticated);
 
 <script>
 export default {
-  name: 'HomeView'
+  name: 'HomeView',
+  components: {
+    Header,
+    MusicBackground
+  }
 }
 </script>
 

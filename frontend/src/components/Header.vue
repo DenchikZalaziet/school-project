@@ -1,29 +1,40 @@
 <template>
-  <header class="p-2 border-bottom app-header">
-    <div class="container">
-      <div class="d-flex flex-wrap align-items-center justify-content-center justify-content-lg-start">
-        <router-link :to="{path: '/profile/me/', query: {page: 1}}" class="logo-container d-flex lign-items-center">
-          <img src="../assets/logo.png" class="logo"  alt="Лого" width="70" height="70">
+  <header class="app-header sticky-top bg-white border-bottom">
+    <div class="container py-2">
+      <div class="d-flex align-items-center">
+        
+        <router-link to="/" class="d-flex align-items-center text-decoration-none min-width-0 flex-grow-1">
+          <img src="../assets/logo.png" class="logo-img flex-shrink-0" alt="Logo">
+          <span class="brand-name ms-2 fs-4 fw-bold text-truncate">PolyFret</span>
         </router-link>
 
-        <ul class="nav col-12 col-lg-auto me-lg-auto mb-2 justify-content-center mb-md-0">
-          <router-link :to="`/`" class="header-link"><a class="nav-link px-2 text-secondary">Главная</a></router-link>
-          <router-link :to="{path: '/scales/', query: {page: 1}}" class="header-link"><a class="nav-link px-2 text-secondary">Гаммы</a></router-link>
+        <ul class="nav d-none d-lg-flex px-3">
+          <li><router-link to="/" class="nav-link custom-nav-link" active-class="active">Главная</router-link></li>
+          <li><router-link :to="{path: '/scales/', query: {page: 1}}" class="nav-link custom-nav-link" active-class="active">Гаммы</router-link></li>
         </ul>
 
-        <div class="text-end" v-if="authStore.isAuthenticated">
-          <router-link :to="{path: '/profile/me/', query: {page: 1}}" class="header-link">
-            <a href="#" class="btn btn-outline-primary rounded-pill px-4 mx-2 shadow-sm">
-              <i class="bi bi-person me-2"></i> {{ authStore.username }}
-            </a>
-          </router-link>
-          <button type="button" class="btn btn-primary mx-2" @click="logout">Выйти</button>
+        <div class="auth-actions d-flex align-items-center gap-2 flex-shrink-0">
+          <template v-if="authStore.isAuthenticated">
+            <router-link :to="{path: '/profile/me/', query: {page: 1}}" class="btn btn-profile btn-outline-primary rounded-pill">
+              <i class="bi bi-person-circle"></i>
+              <span class="ms-2 d-none d-md-inline">{{ authStore.username }}</span>
+            </router-link>
+            <button @click="logout" class="btn btn-outline-danger rounded-pill">
+              <i class="bi bi-box-arrow-right d-md-none"></i>
+              <span class="d-none d-md-inline">Выйти</span>
+            </button>
+          </template>
+
+          <template v-else>
+            <button @click="$router.push('/login')" class="btn btn-outline-primary rounded-pill">
+              <i class="bi bi-box-arrow-in-right"></i> <span class="ms-2 d-none d-sm-inline">Вход</span>
+            </button>
+            <button @click="$router.push('/register')" class="btn btn-primary rounded-pill shadow-sm">
+              <i class="bi bi-person-plus-fill"></i> <span class="ms-2 d-none d-sm-inline">Регистрация</span>
+            </button>
+          </template>
         </div>
 
-        <div class="text-end" v-else>
-          <button type="button" class="btn btn-outline-primary me-2 px-4" @click="$router.push('/login')">Вход</button>
-          <router-link :to="`/register/`"> <button type="button" class="btn btn-primary">Регистрация</button> </router-link>
-        </div>
       </div>
     </div>
   </header>
@@ -31,73 +42,62 @@
 
 <script setup>
 import { useAuthStore } from '@/utils/auth_store';
+import { useRouter } from 'vue-router';
 
 const authStore = useAuthStore();
-</script>
+const router = useRouter();
 
-<script>
-export default {
-  name: 'Header',
-  methods: {
-    async logout() {
-      useAuthStore().logout();
-      this.$router.push('/');
-    }
-  }
-}
+const logout = () => {
+  authStore.logout();
+  router.push('/');
+};
 </script>
 
 <style scoped>
-.header-link { 
-  text-decoration: none; 
-}
-  
 .app-header {
-  background-color: white;
   border-top: 4px solid var(--primary-blue);
-  border-bottom: 1px solid var(--border-blue);
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }
-  
-.logo {
+
+.logo-img {
+  width: 45px;
+  height: 45px;
+}
+
+.brand-name {
   color: var(--primary-blue);
-  font-size: 1.5rem;
-  gap: 10px;
-  transition: all 0.1s;
+  white-space: nowrap;
 }
 
-.logo:hover, .logo.active {
-  transform: scale(1.1);
-  transition: all 0.3s;
+.min-width-0 {
+  min-width: 0;
 }
 
-.nav-link {
-  color: #333;
-  font-weight: 500;
-  position: relative;
-  padding: 0.5rem 1rem !important;
-  transition: all 0.3s;
+.auth-actions {
+  flex-shrink: 0;
 }
 
-.nav-link:hover, .nav-link.active {
-  transform: translateY(-2px);
-  color: var(--primary-blue);
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem 1rem;
+  font-weight: 600;
+  white-space: nowrap;
+  transition: all 0.2s;
+  border-width: 1px;
 }
 
-.nav-link:after {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: 50%;
-  width: 0;
-  height: 3px;
-  background: var(--primary-blue);
-  transition: all 0.3s;
-  transform: translateX(-50%);
+.btn-primary {
+  background-color: var(--primary-blue);
+  border-color: var(--primary-blue);
+  box-shadow: 0 4px 12px rgba(var(--primary-blue-rgb, 79, 70, 229), 0.25);
 }
 
-.nav-link:hover:after, .nav-link.active:after {
-  width: 70%;
+.btn-primary:hover {
+  background-color: var(--dark-blue);
+  border-color: var(--dark-blue);
+  box-shadow: 0 8px 18px rgba(var(--primary-blue-rgb, 79, 70, 229), 0.3);
 }
 
 .btn-outline-primary {
@@ -108,25 +108,55 @@ export default {
 .btn-outline-primary:hover {
   background-color: var(--primary-blue);
   color: white;
-}
-
-.btn-primary {
-  background-color: var(--primary-blue);
   border-color: var(--primary-blue);
-  transition: all 0.3s;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
-.btn-primary:hover {
+.custom-nav-link {
+  color: var(--primary-blue);
+  font-weight: 600;
+  text-decoration: none;
+  position: relative;
+  padding: 8px 0;
+  transition: color 0.3s ease;
+}
+
+.custom-nav-link {
+  color: var(--primary-blue);
+  font-weight: 600;
+  text-decoration: none;
+  padding: 8px 16px;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.custom-nav-link:hover {
+  border-radius: 4px;
+  color: var(--dark-blue);
+}
+
+.custom-nav-link.active {
+  color: var(--dark-blue);
+}
+
+.custom-nav-link.active::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 16px;
+  right: 16px; 
+  height: 3px;
   background-color: var(--dark-blue);
-  border-color: var(--dark-blue);
-  transform: translateY(-2px);
+  border-radius: 2px;
 }
 
-.user-info {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  color: #333;
-  font-weight: 500;
+@media (max-width: 576px) {
+  .logo-img { width: 40px; height: 40px; }
+  .brand-name { font-size: 1.1rem; }
+  .btn { padding: 0.4rem 0.75rem; font-size: 0.85rem; }
+}
+
+@media (max-width: 380px) {
+  .brand-name { display: none; }
 }
 </style>

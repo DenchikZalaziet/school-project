@@ -1,11 +1,10 @@
 from datetime import timedelta
 
-from backend.app.utils.auth_utils import (create_access_token,
-                                          get_user_in_db_by_name)
+from backend.app.utils.auth_utils import create_access_token, get_user_in_db_by_name
 from backend.app.utils.hashing_utils import get_password_hash, verify_password
+
 # noinspection PyUnresolvedReferences
-from backend.tests.setup import (client, override_deps, test_db,
-                                 test_mongo_client)
+from backend.tests.setup import client, override_deps, test_db, test_mongo_client
 
 
 def test_password_hashing():
@@ -21,11 +20,9 @@ def test_password_hashing():
 
 def test_db_user_operations(test_db):
     users_cl = test_db.users
-    users_cl.insert_one({
-        "username": "test_user",
-        "hashed_password": "hashed_pw",
-        "disabled": False
-    })
+    users_cl.insert_one(
+        {"username": "test_user", "hashed_password": "hashed_pw", "disabled": False}
+    )
 
     user = get_user_in_db_by_name("test_user", users_cl)
     assert user
@@ -46,31 +43,29 @@ def test_full_auth_flow(client):
     response = client.get("/user/me", headers={"Authorization": f"Bearer {0}"})
     assert response.status_code == 401
 
-    response = client.post("/auth/register", data={
-        "username": "test_user",
-        "password": "secure_password123"
-    })
+    response = client.post(
+        "/auth/register",
+        data={"username": "test_user", "password": "secure_password123"},
+    )
     assert response.status_code == 201
     token = response.json()["access_token"]
     assert len(token) > 100
 
-    response = client.post("/auth/register", data={
-        "username": "test_user",
-        "password": "secure_password123"
-    })
+    response = client.post(
+        "/auth/register",
+        data={"username": "test_user", "password": "secure_password123"},
+    )
     assert response.status_code == 409
 
-    response = client.post("/auth/login", data={
-        "username": "test_user",
-        "password": "secure_password123"
-    })
+    response = client.post(
+        "/auth/login", data={"username": "test_user", "password": "secure_password123"}
+    )
     assert response.status_code == 200
     assert "access_token" in response.json()
 
-    response = client.post("/auth/login", data={
-        "username": "test_user",
-        "password": "wrong_password"
-    })
+    response = client.post(
+        "/auth/login", data={"username": "test_user", "password": "wrong_password"}
+    )
     assert response.status_code == 401
 
     response = client.get("/user/me", headers={"Authorization": f"Bearer {token}"})
@@ -83,14 +78,15 @@ def test_full_auth_flow(client):
     access_token_expires = timedelta(minutes=-1)
     expired_token = create_access_token({"sub": "test_user"}, access_token_expires)
 
-    response = client.get("/user/me", headers={"Authorization": f"Bearer {expired_token}"})
+    response = client.get(
+        "/user/me", headers={"Authorization": f"Bearer {expired_token}"}
+    )
     assert response.status_code == 401
 
     response = client.delete("/user/me", headers={"Authorization": f"Bearer {token}"})
     assert response.status_code == 204
 
-    response = client.post("/auth/login", data={
-        "username": "test_user",
-        "password": "secure_password123"
-    })
+    response = client.post(
+        "/auth/login", data={"username": "test_user", "password": "secure_password123"}
+    )
     assert response.status_code == 401

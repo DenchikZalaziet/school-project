@@ -5,11 +5,11 @@
 ## Технологии
 - **Backend**: FastAPI, MongoDB, JWT, Pytest
 - **Frontend**: Vue 3, TypeScript, Bootstrap 5, Pinia
-- **DevOps**: Docker, Docker Compose
+- **DevOps**: Docker, Docker Compose, Nginx
 
 ## Backend
 ### Из корня
-- Запуск сервера с автоматическим обновлением при изменениях: <br>
+- Запуск сервера с автоматическим обновлением при изменения (dev): <br>
 ``` uvicorn backend.app.main:app --env-file ./backend/.env.development ``` <br>
 
 <br>
@@ -28,5 +28,5 @@
 - Backend API: http://localhost:8000
 - API Docs: http://localhost:8000/docs
 
-## Демо-данные
-При первом запуске через Docker Compose автоматически загружаются данные из дампа `/bd/dump`
+## Данные
+При создании контейнера через Docker Compose автоматически загружаются данные из дампа `/bd/dump`

@@ -12,9 +12,11 @@ from starlette import status
 from backend.app.schemas.user_schemas import TokenData, User, UserInDB
 from backend.app.utils.db_utils import get_users_collection
 from backend.app.utils.hashing_utils import verify_password
-from backend.app.utils.loader import (ALGORITHM,
-                                      DEFAULT_ACCESS_TOKEN_EXPIRE_MINUTES,
-                                      SECRET_KEY)
+from backend.app.utils.loader import (
+    ALGORITHM,
+    DEFAULT_ACCESS_TOKEN_EXPIRE_MINUTES,
+    SECRET_KEY,
+)
 
 OAUTH2_SCHEME = OAuth2PasswordBearer(tokenUrl="auth", auto_error=False)
 
@@ -24,18 +26,24 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -
     if expires_delta:
         expire = datetime.now(timezone.utc) + expires_delta
     else:
-        expire = datetime.now(timezone.utc) + timedelta(minutes=DEFAULT_ACCESS_TOKEN_EXPIRE_MINUTES)
+        expire = datetime.now(timezone.utc) + timedelta(
+            minutes=DEFAULT_ACCESS_TOKEN_EXPIRE_MINUTES
+        )
     to_encode.update({"exp": expire})
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
 
 
-def authenticate_user(username: str, password: str, collection: Collection = Depends(get_users_collection)) -> Optional[User]:
+def authenticate_user(
+    username: str, password: str, collection: Collection = Depends(get_users_collection)
+) -> Optional[User]:
     user = get_user_in_db_by_name(username, collection)
     if not user or not verify_password(password, str(user.hashed_password)):
         return None
     if user.disabled:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Неактивный пользователь")              
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN, detail="Неактивный пользователь"
+        )
     return user
 
 
@@ -58,8 +66,10 @@ def get_user_in_db_by_id(id: str, collection: Collection) -> Optional[UserInDB]:
     return UserInDB.model_validate(db_user)
 
 
-async def get_current_user(token: Annotated[str, Depends(OAUTH2_SCHEME)],
-                           collection: Collection = Depends(get_users_collection)) -> User:
+async def get_current_user(
+    token: Annotated[str, Depends(OAUTH2_SCHEME)],
+    collection: Collection = Depends(get_users_collection),
+) -> User:
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Не удалось подтвердить данные для входа",
@@ -81,14 +91,20 @@ async def get_current_user(token: Annotated[str, Depends(OAUTH2_SCHEME)],
     return user
 
 
-async def get_current_active_user(current_user: Annotated[User, Depends(get_current_user)]) -> User:
+async def get_current_active_user(
+    current_user: Annotated[User, Depends(get_current_user)],
+) -> User:
     if current_user.disabled:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Неактивный пользователь")
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN, detail="Неактивный пользователь"
+        )
     return current_user
 
 
-async def get_optional_current_user(token: Annotated[str, Depends(OAUTH2_SCHEME)],
-                                    collection: Collection = Depends(get_users_collection)) -> Optional[User]:
+async def get_optional_current_user(
+    token: Annotated[str, Depends(OAUTH2_SCHEME)],
+    collection: Collection = Depends(get_users_collection),
+) -> Optional[User]:
     if token is None:
         return None
     try:
@@ -103,7 +119,11 @@ async def get_optional_current_user(token: Annotated[str, Depends(OAUTH2_SCHEME)
     return user
 
 
-async def get_optional_active_user(current_user: Optional[User] = Depends(get_optional_current_user)) -> Optional[User]:
+async def get_optional_active_user(
+    current_user: Optional[User] = Depends(get_optional_current_user),
+) -> Optional[User]:
     if current_user is not None and current_user.disabled:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Неактивный пользователь")
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN, detail="Неактивный пользователь"
+        )
     return current_user

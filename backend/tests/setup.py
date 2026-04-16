@@ -14,6 +14,7 @@ def test_mongo_client():
     import os
 
     import dotenv
+
     dotenv.load_dotenv()
     MONGO_URI = os.getenv("MONGO_URI", "mongodb://localhost:27017/")
     client = MongoClient(MONGO_URI)
@@ -45,28 +46,38 @@ def client(override_deps):
     return TestClient(app)
 
 
-def create_new_instrument_and_tuning(number_of_strings: int, fretboard_length: int, tuning: list[str]) -> tuple[Instrument, Tuning]:
-    instrument_object = Instrument(_id=str(ObjectId()),
-                            name="Custom Instrument",
-                            description="Custom Instrument",
-                            number_of_strings=number_of_strings,
-                            fretboard_length=fretboard_length)
-    tuning_object = Tuning(_id=str(ObjectId()),
-                    name="Custom Tuning",
-                    description="Custom 6 string guitar tuning",
-                    notes=tuning,
-                    instrument_id=instrument_object.id)
+def create_new_instrument_and_tuning(
+    number_of_strings: int, fretboard_length: int, tuning: list[str]
+) -> tuple[Instrument, Tuning]:
+    instrument_object = Instrument(
+        _id=str(ObjectId()),
+        name="Custom Instrument",
+        description="Custom Instrument",
+        number_of_strings=number_of_strings,
+        fretboard_length=fretboard_length,
+    )
+    tuning_object = Tuning(
+        _id=str(ObjectId()),
+        name="Custom Tuning",
+        description="Custom 6 string guitar tuning",
+        notes=tuning,
+        instrument_id=instrument_object.id,
+    )
     return (instrument_object, tuning_object)
 
 
 class TestingStash:
-    Guitar6String = Instrument(_id=str(ObjectId()),
-                               name="Guitar",
-                               description="Standard guitar",
-                               number_of_strings=6,
-                               fretboard_length=22)
-    GuitarStandardTuning = Tuning(_id=str(ObjectId()),
-                                  name="Standard Tuning",
-                                  description="Standard 6 string guitar tuning",
-                                  notes=["E", "A", "D", "G", "B", "E"],
-                                  instrument_id=str(Guitar6String.id))
+    Guitar6String = Instrument(
+        _id=str(ObjectId()),
+        name="Guitar",
+        description="Standard guitar",
+        number_of_strings=6,
+        fretboard_length=22,
+    )
+    GuitarStandardTuning = Tuning(
+        _id=str(ObjectId()),
+        name="Standard Tuning",
+        description="Standard 6 string guitar tuning",
+        notes=["E2", "A2", "D3", "G3", "B3", "E4"],
+        instrument_id=str(Guitar6String.id),
+    )
